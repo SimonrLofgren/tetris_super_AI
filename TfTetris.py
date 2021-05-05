@@ -9,7 +9,7 @@ import numpy as np
 import tensorflow
 from tensorflow.python.keras import Sequential
 from tensorflow.python.keras.layers import Dense
-from tensorflow.keras.optimizers import Adam
+from tensorflow.python.keras.optimizers import Adam
 
 
 class Agent:
@@ -29,7 +29,7 @@ class Agent:
 
         model = Sequential()
         model.add(Dense(240, input_dim=self.state_input_size))
-        model.add(Dense(240))
+        model.add(Dense(self.number_of_action))
         model.compile(loss='mae', optimizer=Adam(lr=self.learning_rate))
         return model
 
@@ -64,7 +64,7 @@ for e in range(EPISODES):
     grayimg = cv2.cvtColor(state, cv2.COLOR_RGB2GRAY)
     #grayimg = np.reshape(grayimg, [256, state_input_size])
     cv2.imshow('ComWin', grayimg)
-    #env.render()
+    env.render()
     action = agent.get_action(grayimg)
     state, reward, done, info = env.step(action)
 
