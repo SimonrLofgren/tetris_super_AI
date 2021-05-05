@@ -18,7 +18,7 @@ class Agent:
         self.number_of_action = number_of_actions
         self.learning_rate = 0.1
         self.epsilon = 0.1
-        self.epsilon_min = 0.2
+        self.epsilon_min = 0.1
         self.epsilon_decay = 0.9
         self.batch_size = 512
         self.training_start = 1000
@@ -29,7 +29,6 @@ class Agent:
     def build_model(self):
 
         model = Sequential()
-
         model.add(Dense(1, input_dim=self.state_input_size))
         model.add(Dense(30720))
         model.add(Dense(60))
@@ -76,8 +75,10 @@ class Agent:
         if rand_val <= self.epsilon:
             return random.randrange(self.number_of_action)
         else:
+            if state.ndim == 1:
+                state = np.array([state])
             q_learning_value = self.model.predict(state)
-            print(q_learning_value)
+            print(np.argmax(q_learning_value[0]))
             return np.argmax(q_learning_value[0])
 
 EPISODES = 3000
