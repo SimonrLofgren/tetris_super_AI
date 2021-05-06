@@ -1,5 +1,4 @@
 import random
-
 from nes_py.wrappers import JoypadSpace
 import gym_tetris
 from gym_tetris.actions import MOVEMENT
@@ -8,9 +7,11 @@ from collections import deque
 import numpy as np
 import tensorflow
 from tensorflow.python.keras import Sequential
-from tensorflow.python.keras.layers import Dense
+from tensorflow.python.keras.layers import Dense, Flatten
 from tensorflow.keras.optimizers import Adam
-
+from rl.agents import DQNAgent
+from rl.policy import BoltzmannQPolicy
+from rl.memory import SequentialMemory
 
 class Agent:
     def __init__(self, state_input_size, number_of_actions):
@@ -25,20 +26,21 @@ class Agent:
         self.discount_factor = 0.99
         self.memory = deque(maxlen=2000)
         self.model = self.build_model()
+        self.agent = self.build_agent(self.model, self.number_of_action)
 
     def build_model(self):
 
         model = Sequential()
-        model.add(Dense(1, input_dim=self.state_input_size))
-        model.add(Dense(30720))
-        model.add(Dense(60))
-        model.add(Dense(24))
-        model.add(Dense(self.number_of_action))
-        model.compile(loss='mae', optimizer=Adam(lr=self.learning_rate))
+        model.add(Flatten(input_shape=(1, self.state_input_size)))
+        model.add(Dense(30720, activation='relu'))
+        model.add(Dense(60, activation='relu'))
+        model.add(Dense(24, activation='relu'))
+        model.add(Dense(self.number_of_action, activation='linear'))
+
+        #model.compile(loss='mae', optimizer=Adam(lr=self.learning_rate))
         print(model.summary())
         return model
 
-    def train_model(self):
 
         if len(self.memory) < self.training_start:
             return
@@ -81,27 +83,49 @@ class Agent:
             print(np.argmax(q_learning_value[0]))
             return np.argmax(q_learning_value[0])
 
+    def build_agent(self, model, actions):
+        policy = BoltzmannQPolicy()
+        memory = SequentialMemory(limit=50000, window_length=1)
+        dqn = DQNAgent(model=model, memory=memory, policy=policy,
+                       nb_actions=actions, nb_steps_warmup=10, target_model_update=1e-2)
+        return dqn
+
 EPISODES = 3000
 env = gym_tetris.make('TetrisA-v0')
 env = JoypadSpace(env, MOVEMENT)
+
 cv2.namedWindow('ComWin', cv2.WINDOW_NORMAL)
 
-state_input_size = env.observation_space.shape[0] * env.observation_space.shape[1]
+state_input_size = env.observation_space.shape[0]
 number_of_actions = env.action_space.n
-agent = Agent(state_input_size, number_of_actions)
-done = True
 
+agent = Agent(state_input_size, number_of_actions)
+
+state = env.reset()
+grayimg = cv2.cvtColor(state, cv2.COLOR_RGB2GRAY)
+#grayimg = np.reshape(grayimg, [256, state_input_size])
+cv2.imshow('TetrisGray', grayimg)
+grayimg = np.ndarray.flatten(grayimg)
+
+dqn = agent.agent
+dqn.compile(Adam(lr=1e-3), metrics=['mae'])
+dqn.fit(env, nb_steps=50000, visualize=True, verbose=1)
+
+done = True
 for e in range(EPISODES):
     score = 0
-    if done:
-        state = env.reset()
-    grayimg = cv2.cvtColor(state, cv2.COLOR_RGB2GRAY)
-    #grayimg = np.reshape(grayimg, [256, state_input_size])
-    cv2.imshow('ComWin', grayimg)
-    grayimg = np.ndarray.flatten(grayimg)
-    env.render()
-    action = agent.get_action(grayimg)
-    state, reward, done, info = env.step(action)
+    state = env.reset()
+
+    while not done:
+        env.render()
+        grayimg = cv2.cvtColor(state, cv2.COLOR_RGB2GRAY)
+        #grayimg = np.reshape(grayimg, [256, state_input_size])
+        cv2.imshow('TetrisGray', grayimg)
+        grayimg = np.ndarray.flatten(grayimg)
+
+        action = agent.get_action(grayimg)
+
+        state, reward, done, info = env.step(action)
 
 
 env.close()
