@@ -17,13 +17,13 @@ class Agent:
         self.state_input_size = state_input_size
         self.number_of_action = number_of_actions
         self.learning_rate = 0.1
-        self.epsilon = 0.1
+        self.epsilon = 0.2
         self.epsilon_min = 0.2
         self.epsilon_decay = 0.9
-        self.batch_size = 512
+        self.batch_size = 120
         self.training_start = 1000
         self.discount_factor = 0.99
-        self.memory = deque(maxlen=2000)
+        self.memory = deque(maxlen=20000)
         self.model = self.build_model()
 
     def build_model(self):
@@ -32,7 +32,6 @@ class Agent:
 
         model.add(Dense(1, input_dim=self.state_input_size))
         model.add(Dense(480))
-        model.add(Dense(60))
         model.add(Dense(24))
         model.add(Dense(self.number_of_action))
         model.compile(loss='mae', optimizer=Adam(lr=self.learning_rate))
@@ -51,10 +50,10 @@ class Agent:
         action, reward, done = [], [], []
 
         for i in range(self.batch_size):
-            update_input[i] = mini_batch[i][0][0]
+            update_input[i] = mini_batch[i][0]
             action.append(mini_batch[i][1])
             reward.append(mini_batch[i][2])
-            update_target[i] = mini_batch[i][3][0]
+            update_target[i] = mini_batch[i][3]
             done.append(mini_batch[i][4])
 
         target = self.model.predict(update_input)
@@ -67,7 +66,8 @@ class Agent:
             else:
                 target[i][action[i]] = reward[i] + self.discount_factor * (
                     np.amax(target_val[i]))
-
+        self.model.fit(update_input, target, batch_size=self.batch_size,
+                       epochs=1, verbose=0)
     def test_model(self):
         pass
 
@@ -81,14 +81,19 @@ class Agent:
             q_learning_value = self.model.predict(state)
             return np.argmax(q_learning_value[0])
 
+    def append_sample(self, state, action, reward, next_state, done):
+        self.memory.append((state, action, reward, next_state, done))
+        if self.epsilon > self.epsilon_min:
+            self.epsilon *= self.epsilon_decay
+
 
 EPISODES = 3000
 env = gym_tetris.make('TetrisA-v0')
 env = JoypadSpace(env, MOVEMENT)
 cv2.namedWindow('ComWin', cv2.WINDOW_NORMAL)
 
-state_input_size = int((env.observation_space.shape[0] * \
-                   env.observation_space.shape[1])/64)
+state_input_size = int(
+    (env.observation_space.shape[0] * env.observation_space.shape[1]) / 64)
 number_of_actions = env.action_space.n
 agent = Agent(state_input_size, number_of_actions)
 done = True
@@ -97,18 +102,41 @@ inx, iny, inc = env.observation_space.shape
 inx = int(inx / 8)
 iny = int(iny / 8)
 for e in range(EPISODES):
+    done = False
     score = 0
-    if done:
-        state = env.reset()
-    env.render()
+    counter = 0
+    max_score = 0
+    state = env.reset()
     grayimg = cv2.resize(state, (inx, iny))
     grayimg = cv2.cvtColor(grayimg, cv2.COLOR_RGB2GRAY)
-    # grayimg = np.reshape(grayimg, [256, state_input_size])
-    #grayimg = np.reshape(grayimg, (inx, iny))
-    cv2.imshow('ComWin', grayimg)
     grayimg = np.ndarray.flatten(grayimg)
+    while not done:
+        counter += 1
+        env.render()
 
-    action = agent.get_action(grayimg)
-    state, reward, done, info = env.step(action)
+        action = agent.get_action(grayimg)
+        next_state, reward, done, info = env.step(action)
+        next_state = cv2.resize(next_state, (inx, iny))
+        next_state = cv2.cvtColor(next_state, cv2.COLOR_RGB2GRAY)
+        #(thresh, blackAndWhiteImage) = cv2.threshold(next_state, 0, 255,
+        #                                             cv2.THRESH_BINARY)
+
+        cv2.imshow('ComWin', next_state)
+        next_state = np.ndarray.flatten(next_state)
+
+        agent.append_sample(grayimg, action, reward, next_state, done)
+        agent.train_model()
+        grayimg = next_state
+
+
+
+        score += reward
+        reward = reward if not done else -100
+        if counter == 5000:
+            done = True
+        if score > max_score:
+            counter = 0
+            max_score = score
+    print(f'Episode:{e}  Score:{score} memory: {len(agent.memory)}')
 
 env.close()
