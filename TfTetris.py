@@ -97,7 +97,6 @@ def minimize(state):
     state = np.delete(state, range(80, 160), axis=1)
     state = np.delete(state, range(160, 192), axis=0)
     state = cv2.resize(state, (inx, iny))
-    state = np.ndarray.flatten(state)
     return state
 
 
@@ -119,7 +118,7 @@ for e in range(EPISODES):
     max_score = 0
     state = env.reset()
     board_height = 0
-    state = minimize(state)
+    state = np.ndarray.flatten(minimize(state))
 
 
     while not done:
@@ -128,25 +127,10 @@ for e in range(EPISODES):
 
         action = agent.get_action(state)
         next_state, reward, done, info = env.step(action)
-        state = minimize(next_state)
+        next_state = minimize(next_state)
 
-
-        next_state = cv2.cvtColor(next_state, cv2.COLOR_RGB2GRAY)
-
-        next_state = np.delete(next_state,range(0,96),axis=1)
-        next_state = np.delete(next_state, range(0,48), axis=0)
-        next_state = np.delete(next_state, range(80, 160), axis=1)
-        next_state = np.delete(next_state, range(160,192), axis=0)
-
-        (thresh, next_state) = cv2.threshold(next_state, 0, 255,
-                                                     cv2.THRESH_BINARY)
-
-        next_state = cv2.resize(next_state, (inx, iny))
         cv2.imshow('ComWin', next_state)
         next_state = np.ndarray.flatten(next_state)
-
-
-        reward = reward
 
         if info['board_height'] > board_height:
             reward += -(info['board_height'] - board_height)
