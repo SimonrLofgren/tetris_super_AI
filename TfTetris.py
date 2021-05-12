@@ -2,9 +2,10 @@ import random
 
 from nes_py.wrappers import JoypadSpace
 import gym_tetris
-from gym_tetris.actions import MOVEMENT
+from gym_tetris.actions import SIMPLE_MOVEMENT
 import cv2
 from collections import deque
+import random
 import numpy as np
 import tensorflow
 from tensorflow.python.keras import Sequential
@@ -14,24 +15,24 @@ from tensorflow.python.keras.optimizers import Adam
 
 class Agent:
     def __init__(self, state_input_size, number_of_actions):
-        self.state_input_size = state_input_size
+        self.state_input_size = 200
         self.number_of_action = number_of_actions
         self.learning_rate = 0.1
-        self.epsilon = 0.2
+        self.epsilon = 0.5
         self.epsilon_min = 0.2
-        self.epsilon_decay = 0.9
-        self.batch_size = 120
+        self.epsilon_decay = 0.999
+        self.batch_size = 200
         self.training_start = 1000
         self.discount_factor = 0.99
-        self.memory = deque(maxlen=20000)
+        self.memory = deque(maxlen=200000)
         self.model = self.build_model()
 
     def build_model(self):
 
         model = Sequential()
 
-        model.add(Dense(1, input_dim=self.state_input_size))
-        model.add(Dense(480))
+        model.add(Dense(1, input_dim=state_input_size))
+        model.add(Dense(100))
         model.add(Dense(24))
         model.add(Dense(self.number_of_action))
         model.compile(loss='mae', optimizer=Adam(lr=self.learning_rate))
@@ -86,57 +87,78 @@ class Agent:
         if self.epsilon > self.epsilon_min:
             self.epsilon *= self.epsilon_decay
 
+def minimize(state):
+    state = cv2.cvtColor(state, cv2.COLOR_RGB2GRAY)
+    (thresh, state) = cv2.threshold(state, 0, 255,
+                                      cv2.THRESH_BINARY)
+
+    state = np.delete(state, range(0, 96), axis=1)
+    state = np.delete(state, range(0, 48), axis=0)
+    state = np.delete(state, range(80, 160), axis=1)
+    state = np.delete(state, range(160, 192), axis=0)
+    state = cv2.resize(state, (inx, iny))
+    state = np.ndarray.flatten(state)
+    return state
+
 
 EPISODES = 3000
 env = gym_tetris.make('TetrisA-v0')
-env = JoypadSpace(env, MOVEMENT)
+env = JoypadSpace(env, SIMPLE_MOVEMENT)
 cv2.namedWindow('ComWin', cv2.WINDOW_NORMAL)
 
-state_input_size = int(
-    (env.observation_space.shape[0] * env.observation_space.shape[1]) / 64)
+state_input_size = int(200)
 number_of_actions = env.action_space.n
 agent = Agent(state_input_size, number_of_actions)
 done = True
 
-inx, iny, inc = env.observation_space.shape
-inx = int(inx / 8)
-iny = int(iny / 8)
+inx = 10
+iny = 20
 for e in range(EPISODES):
     done = False
     score = 0
-    counter = 0
     max_score = 0
     state = env.reset()
-    grayimg = cv2.resize(state, (inx, iny))
-    grayimg = cv2.cvtColor(grayimg, cv2.COLOR_RGB2GRAY)
-    grayimg = np.ndarray.flatten(grayimg)
+    board_height = 0
+    state = minimize(state)
+
+
     while not done:
-        counter += 1
+
         env.render()
 
-        action = agent.get_action(grayimg)
+        action = agent.get_action(state)
         next_state, reward, done, info = env.step(action)
-        next_state = cv2.resize(next_state, (inx, iny))
-        next_state = cv2.cvtColor(next_state, cv2.COLOR_RGB2GRAY)
-        #(thresh, blackAndWhiteImage) = cv2.threshold(next_state, 0, 255,
-        #                                             cv2.THRESH_BINARY)
+        state = minimize(next_state)
 
+
+        next_state = cv2.cvtColor(next_state, cv2.COLOR_RGB2GRAY)
+
+        next_state = np.delete(next_state,range(0,96),axis=1)
+        next_state = np.delete(next_state, range(0,48), axis=0)
+        next_state = np.delete(next_state, range(80, 160), axis=1)
+        next_state = np.delete(next_state, range(160,192), axis=0)
+
+        (thresh, next_state) = cv2.threshold(next_state, 0, 255,
+                                                     cv2.THRESH_BINARY)
+
+        next_state = cv2.resize(next_state, (inx, iny))
         cv2.imshow('ComWin', next_state)
         next_state = np.ndarray.flatten(next_state)
 
-        agent.append_sample(grayimg, action, reward, next_state, done)
-        agent.train_model()
-        grayimg = next_state
 
+        reward = reward
 
-
+        if info['board_height'] > board_height:
+            reward += -(info['board_height'] - board_height)
+            board_height = info['board_height']
         score += reward
-        reward = reward if not done else -100
-        if counter == 5000:
-            done = True
-        if score > max_score:
-            counter = 0
-            max_score = score
-    print(f'Episode:{e}  Score:{score} memory: {len(agent.memory)}')
+        if done:
+            reward = reward - 100
+        agent.append_sample(state, action, reward, next_state, done)
+        agent.train_model()
+        state = next_state
+
+    line = info['number_of_lines']
+    print(f'Episode:{e}  Score:{score} Lines:{line} epsilon:{agent.epsilon}')
 
 env.close()
