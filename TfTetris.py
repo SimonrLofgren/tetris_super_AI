@@ -13,10 +13,15 @@ from tensorflow.python.keras.layers import Dense
 from tensorflow.python.keras.optimizers import Adam
 
 
+EPISODES   = 1500
+load_model = True
+
 class Agent:
     def __init__(self, state_input_size, number_of_actions):
+
         self.state_input_size = 200
         self.number_of_action = number_of_actions
+
         self.learning_rate = 0.1
         self.epsilon = 0.5
         self.epsilon_min = 0.2
@@ -28,8 +33,8 @@ class Agent:
         self.model = self.build_model()
 
     def build_model(self):
-
         model = Sequential()
+
 
         model.add(Dense(1, input_dim=state_input_size))
         model.add(Dense(100))
@@ -37,10 +42,25 @@ class Agent:
         model.add(Dense(self.number_of_action))
         model.compile(loss='mae', optimizer=Adam(lr=self.learning_rate))
         print(model.summary())
+
         return model
 
-    def train_model(self):
+    # get action from model using epsilon-greedy policy
+    def get_action(self, state):
+        if np.random.rand() <= self.epsilon:
+            return random.randrange(self.number_of_actions)
+        else:
+            q_value = self.model.predict(state)
+            return np.argmax(q_value[0])
 
+    # save sample <state,action,reward,nest_state> to the replay memory
+    def append_sample(self, state, action, reward, next_state, done):
+        self.memory.append((state, action, reward, next_state, done))
+        if self.epsilon > self.epsilon_min:
+            self.epsilon *= self.epsilon_decay
+
+
+    def train_model(self):
         if len(self.memory) < self.training_start:
             return
         batch_size = min(self.batch_size, len(self.memory))
@@ -67,6 +87,7 @@ class Agent:
             else:
                 target[i][action[i]] = reward[i] + self.discount_factor * (
                     np.amax(target_val[i]))
+
         self.model.fit(update_input, target, batch_size=self.batch_size,
                        epochs=1, verbose=0)
     def test_model(self):
@@ -119,6 +140,13 @@ for e in range(EPISODES):
     state = env.reset()
     board_height = 0
     state = np.ndarray.flatten(minimize(state))
+
+
+    EPISODES = 3000
+    env = gym_tetris.make('TetrisA-v0')
+    env = JoypadSpace(env, MOVEMENT)
+    cv2.namedWindow('ComWin', cv2.WINDOW_NORMAL)
+    env.reset()
 
 
     while not done:
