@@ -10,7 +10,7 @@ import numpy as np
 import tensorflow
 from tensorflow.python.keras import Sequential
 from tensorflow.python.keras.layers import Dense
-from tensorflow.python.keras.optimizers import Adam
+from tensorflow.keras.optimizers import Adam
 
 
 EPISODES   = 1500
@@ -144,7 +144,7 @@ for e in range(EPISODES):
 
     EPISODES = 3000
     env = gym_tetris.make('TetrisA-v0')
-    env = JoypadSpace(env, MOVEMENT)
+    env = JoypadSpace(env, SIMPLE_MOVEMENT)
     cv2.namedWindow('ComWin', cv2.WINDOW_NORMAL)
     env.reset()
 
