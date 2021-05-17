@@ -3,6 +3,7 @@ import random
 from nes_py.wrappers import JoypadSpace
 import gym_tetris
 from gym_tetris.actions import MOVEMENT
+from gym_tetris.actions import SIMPLE_MOVEMENT
 import cv2
 from collections import deque
 import numpy as np
@@ -78,12 +79,12 @@ class Agent:
             if state.ndim == 1:
                 state = np.array([state])
             q_learning_value = self.model.predict(state)
-            print(np.argmax(q_learning_value[0]))
+            #print(np.argmax(q_learning_value[0]))
             return np.argmax(q_learning_value[0])
 
 EPISODES = 3000
 env = gym_tetris.make('TetrisA-v0')
-env = JoypadSpace(env, MOVEMENT)
+env = JoypadSpace(env, SIMPLE_MOVEMENT)
 cv2.namedWindow('ComWin', cv2.WINDOW_NORMAL)
 
 state_input_size = env.observation_space.shape[0] * env.observation_space.shape[1]
@@ -103,8 +104,13 @@ for e in range(EPISODES):
     action = agent.get_action(grayimg)
     state, reward, done, info = env.step(action)
 
-
 env.close()
 
 
+# spara model. implementera fr ms. pacman
+# PLOT episodes
+# supermario showcase
+# neat tetris.
+# olika tweaks
 
+# powerpoint / notebook?
