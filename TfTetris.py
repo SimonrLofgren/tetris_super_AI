@@ -142,12 +142,6 @@ for e in range(EPISODES):
     state = np.ndarray.flatten(minimize(state))
 
 
-    EPISODES = 3000
-    env = gym_tetris.make('TetrisA-v0')
-    env = JoypadSpace(env, SIMPLE_MOVEMENT)
-    cv2.namedWindow('ComWin', cv2.WINDOW_NORMAL)
-    env.reset()
-
 
     while not done:
 
