@@ -1,5 +1,5 @@
 import random
-
+import matplotlib.pyplot as plt
 from nes_py.wrappers import JoypadSpace
 import gym_tetris
 from gym_tetris.actions import MOVEMENT
@@ -12,22 +12,40 @@ from tensorflow.python.keras.layers import Dense
 from tensorflow.keras.optimizers import Adam
 
 
-EPISODES   = 1500
+EPISODES = 1500
 load_model = True
+
 
 class Agent:
     def __init__(self, state_input_size, number_of_actions):
-        self.state_input_size = state_input_size
-        self.number_of_actions = number_of_actions
-        self.learning_rate = 0.1
-        self.epsilon = 0.1
-        self.epsilon_min = 0.1
-        self.epsilon_decay = 0.9
-        self.batch_size = 512
-        self.training_start = 1000
-        self.discount_factor = 0.99
+        if load_model:
+            self.state_input_size = state_input_size
+            self.number_of_actions = number_of_actions
+            self.learning_rate = 0.1
+            self.epsilon = 0.1
+            self.epsilon_min = 0.1
+            self.epsilon_decay = 0.9
+            self.batch_size = 512
+            self.training_start = 1000
+            self.discount_factor = 0.99
+            self.memory = deque(maxlen=2000)
+            self.model = self.build_model()
+        else:
+            self.state_input_size = state_input_size
+            self.number_of_actions = number_of_actions
+            self.learning_rate = 0.1
+            self.epsilon = 1.0
+            self.epsilon_min = 0.1
+            self.epsilon_decay = 0.9
+            self.batch_size = 512
+            self.training_start = 1000
+            self.discount_factor = 0.99
+
         self.memory = deque(maxlen=2000)
         self.model = self.build_model()
+
+        if load_model:
+            self.model.load_weights("./tetris.h5")
 
     def build_model(self):
         model = Sequential()
@@ -52,7 +70,6 @@ class Agent:
         self.memory.append((state, action, reward, next_state, done))
         if self.epsilon > self.epsilon_min:
             self.epsilon *= self.epsilon_decay
-
 
     def train_model(self):
         if len(self.memory) < self.training_start:
@@ -125,7 +142,14 @@ if __name__ == '__main__':
                 state = next_state
                 score += reward
 
-                if done:
-                    break
+            if done:
+                scores.append(score)
+                episodes.append(e)
+                plt.plot(episodes, scores, 'b')
+                plt.savefig("tetris.png")
+                print("episode:", e, "  score:", score, "  memory length:",
+                      len(agent.memory), "  epsilon:", agent.epsilon)
+        if (e % 50 == 0) & (load_model == False):
+            agent.model.save_weights("pacman.h5")
 
         env.close()
