@@ -6,7 +6,6 @@ from gym_tetris.actions import MOVEMENT
 import cv2
 from collections import deque
 import numpy as np
-import tensorflow
 from tensorflow.python.keras import Sequential
 from tensorflow.python.keras.layers import Dense
 from tensorflow.keras.optimizers import Adam
