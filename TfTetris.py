@@ -2,17 +2,18 @@ import random
 import matplotlib.pyplot as plt
 from nes_py.wrappers import JoypadSpace
 import gym_tetris
-from gym_tetris.actions import MOVEMENT
+from gym_tetris.actions import SIMPLE_MOVEMENT
 import cv2
 from collections import deque
 import numpy as np
 from tensorflow.python.keras import Sequential
 from tensorflow.python.keras.layers import Dense
 from tensorflow.keras.optimizers import Adam
+from statistics import Statistics
 
 
 EPISODES = 1500
-load_model = True
+load_model = False
 
 
 class Agent:
@@ -107,7 +108,9 @@ if __name__ == '__main__':
 
     EPISODES = 3000
     env = gym_tetris.make('TetrisA-v0')
-    env = JoypadSpace(env, MOVEMENT)
+    SIMPLE_MOVEMENT.pop(0)
+    env = JoypadSpace(env, SIMPLE_MOVEMENT)
+    print(SIMPLE_MOVEMENT)
     cv2.namedWindow('ComWin', cv2.WINDOW_NORMAL)
     env.reset()
 
@@ -119,7 +122,13 @@ if __name__ == '__main__':
 
     scores, episodes = [], []
 
+    st = Statistics([], [], [])
+    sum_all_scores = 0
+    plot_last_10_mean = []
+    plot_mean = []
+    plot_scores = []
     for e in range(EPISODES):
+        st.episodes.append(e)
         done = False
         score = 0
         state = env.reset()
@@ -142,13 +151,27 @@ if __name__ == '__main__':
                 score += reward
 
             if done:
+                st.total_score.append(score)
                 scores.append(score)
                 episodes.append(e)
                 plt.plot(episodes, scores, 'b')
                 plt.savefig("tetris.png")
                 print("episode:", e, "  score:", score, "  memory length:",
                       len(agent.memory), "  epsilon:", agent.epsilon)
-        if (e % 50 == 0) & (load_model == False):
-            agent.model.save_weights("pacman.h5")
 
-        env.close()
+
+                st.last_10_scores.append(score)
+                st.last_10_scores.pop(0)
+                sum_all_scores += score
+                mean_score = sum_all_scores / e
+                last_10_mean = sum(st.last_10_scores) / 10
+                plot_last_10_mean.append(last_10_mean)
+                plot_mean.append(mean_score)
+                plot_scores.append(score)
+                st.joakims_plot(plot_scores, plot_mean, plot_last_10_mean)
+
+
+            if (e % 50 == 0) & (load_model == False):
+                agent.model.save_weights("tetris.h5")
+
+    env.close()
