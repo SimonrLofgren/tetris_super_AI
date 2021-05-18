@@ -55,10 +55,11 @@ class Statistics:
     def timer(self):
         splits = []
         for t in self.times:
-            splits.append(self.times[t] - self.times[0])
-            return splits
+            splits.append(t - self.times[0])
+        self.times = []
+        return splits
 
     def t(self):
-        t = time.
+        t = time.perf_counter()
         self.times.append(t)
 

@@ -122,12 +122,13 @@ if __name__ == '__main__':
 
     scores, episodes = [], []
 
-    st = Statistics([], [], [])
+    st = Statistics([], [], [], [])
     sum_all_scores = 0
     plot_last_10_mean = []
     plot_mean = []
     plot_scores = []
-    for e in range(EPISODES):
+    for e in range(1, EPISODES):
+        st.t()
         st.episodes.append(e)
         done = False
         score = 0
@@ -135,20 +136,19 @@ if __name__ == '__main__':
         state = np.reshape(state, [-1, state_input_size])
         lives = 3
         while not done:
-            dead = False
-            while not dead:
-                env.render()
-                # get action for the current state and go one step in environment
-                action = agent.get_action(state)
-                next_state, reward, done, info = env.step(action)
-                next_state = np.reshape(next_state, [-1, state_input_size])
-                # save the sample <s, a, r, s'> to the replay memory
-                agent.append_sample(state, action, reward, next_state, done)
-                # every time step do the training
-                agent.train_model()
+            st.t()
+            env.render()
+            # get action for the current state and go one step in environment
+            action = agent.get_action(state)
+            next_state, reward, done, info = env.step(action)
+            next_state = np.reshape(next_state, [-1, state_input_size])
+            # save the sample <s, a, r, s'> to the replay memory
+            agent.append_sample(state, action, reward, next_state, done)
+            # every time step do the training
+            agent.train_model()
 
-                state = next_state
-                score += reward
+            state = next_state
+            score += reward
 
             if done:
                 st.total_score.append(score)
@@ -163,7 +163,7 @@ if __name__ == '__main__':
                 st.last_10_scores.append(score)
                 st.last_10_scores.pop(0)
                 sum_all_scores += score
-                mean_score = sum_all_scores / e
+                mean_score = sum_all_scores / (e+1)
                 last_10_mean = sum(st.last_10_scores) / 10
                 plot_last_10_mean.append(last_10_mean)
                 plot_mean.append(mean_score)
@@ -173,5 +173,8 @@ if __name__ == '__main__':
 
             if (e % 50 == 0) & (load_model == False):
                 agent.model.save_weights("tetris.h5")
+            st.t()
+            splits = st.timer()
+            print(splits[1])
 
     env.close()
