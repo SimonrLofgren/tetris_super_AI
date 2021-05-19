@@ -161,8 +161,9 @@ if __name__ == '__main__':
 
             if (e % 50 == 0) & (load_model == False):
                 agent.model.save_weights("tetris.h5")
+
             st.t()
             splits = st.timer()
-            print(splits[1])
+            [print(time) for time in splits]
 
     env.close()
