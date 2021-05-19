@@ -122,7 +122,7 @@ if __name__ == '__main__':
 
     scores, episodes = [], []
 
-    st = Statistics([], [], [], [])
+    st = Statistics([], [], [], [], [], [], [], [])
     sum_all_scores = 0
     plot_last_10_mean = []
     plot_mean = []
