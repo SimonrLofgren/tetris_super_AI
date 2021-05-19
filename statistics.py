@@ -36,7 +36,8 @@ class Statistics:
         plt.show()
         plt.savefig("iterationTime.png")
 
-    def joakims_plot(self, scores, mean_scores, last_10):
+    def joakims_plot(self, st):
+
         plt.ion()
 
         display.clear_output()
@@ -46,14 +47,14 @@ class Statistics:
         plt.xlabel("Number of Games")
         plt.ylabel("Score")
 
-        plt.plot(scores)
-        plt.plot(mean_scores)
-        plt.plot(last_10)
+        plt.plot(st.plot_scores)
+        plt.plot(st.plot_mean)
+        plt.plot(st.plot_last_10_mean)
         plt.ylim(ymin=0)
 
-        plt.text(len(scores) - 1, scores[-1], str(scores[-1]))
-        plt.text(len(mean_scores) - 1, mean_scores[-1], str(mean_scores[-1]))
-        plt.text(len(last_10) - 1, last_10[-1], str(last_10[-1]))
+        plt.text(len(st.plot_scores) - 1, st.plot_scores[-1], str(st.plot_scores[-1]))
+        plt.text(len(st.plot_mean) - 1, st.plot_mean[-1], str(st.plot_mean[-1]))
+        plt.text(len(st.plot_last_10_mean) - 1, st.plot_last_10_mean[-1], str(st.plot_last_10_mean[-1]))
         plt.show(block=False)
         plt.pause(.1)
         plt.savefig("joakims_plot.png")
@@ -84,4 +85,4 @@ class Statistics:
 
         st.plot_scores.append(score)
 
-        st.joakims_plot(st.plot_scores, st.plot_mean, st.plot_last_10_mean)
+        st.joakims_plot(st)
