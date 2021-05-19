@@ -84,10 +84,10 @@ class Agent:
         action, reward, done = [], [], []
 
         for i in range(self.batch_size):
-            update_input[i] = mini_batch[i][0][0]
+            update_input[i] = mini_batch[i][0]
             action.append(mini_batch[i][1])
             reward.append(mini_batch[i][2])
-            update_target[i] = mini_batch[i][3][0]
+            update_target[i] = mini_batch[i][3]
             done.append(mini_batch[i][4])
 
         target = self.model.predict(update_input)
@@ -148,6 +148,7 @@ if __name__ == '__main__':
         score = 0
         state = env.reset()
         state = Minimize(state)
+        state = np.ndarray.flatten(state)
         while not done:
             st.t()
             env.render()
