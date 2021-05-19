@@ -173,7 +173,7 @@ if __name__ == '__main__':
                 print("episode:", e, "  score:", score, "  memory length:",
                       len(agent.memory), "  epsilon:", agent.epsilon)
 
-                st.statistics(st, score, e)
+                st.statistics(score, e)
 
             if (e % 50 == 0) & (load_model == False):
                 agent.model.save_weights("tetris.h5")
