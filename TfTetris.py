@@ -180,6 +180,6 @@ if __name__ == '__main__':
 
             st.t()
             splits = st.timer()
-            [print(time) for time in splits]
+            [print(f'split {i+1}: {splits[i]}') for i in range(len(splits)) if splits[i] > 0.3]
 
     env.close()
