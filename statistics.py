@@ -29,7 +29,7 @@ class Statistics:
             return pickle.load(f), print('Data loaded')
 
     @staticmethod
-    def plot(x, last_10, xlabel='', ylabel='', title='', ymax=None):
+    def plot(x, last_10, x2=None, last_10_2=None, xlabel='', ylabel='', title='', ymax=None):
         plt.ion()
 
         display.clear_output()
@@ -41,6 +41,9 @@ class Statistics:
 
         plt.plot(last_10)
         plt.plot(x)
+        plt.plot(x2)
+        plt.plot(last_10_2)
+
 
         plt.ylim(ymin=0, ymax=ymax)
 
