@@ -10,6 +10,7 @@ def main():
         if inp == 'exit':
             running = False
 
+
         elif inp == '2':
             try:
                 inp = input('-: ')
