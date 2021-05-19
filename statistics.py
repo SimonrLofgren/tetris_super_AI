@@ -17,24 +17,35 @@ class Statistics:
         self.plot_mean = plot_mean
         self.plot_scores = plot_scores
 
-    def save_data(self, data, filename):
+    @staticmethod
+    def save_data(data, filename):
         with open(str(filename) + '.pkl', 'wb') as f:
             pickle.dump(data, f)
         print('Data saved.')
 
-    def load_data(self, data):
-        with open(str(data)) as f:
+    @staticmethod
+    def load_data(filename):
+        with open(str(filename), 'rb') as f:
             return pickle.load(f), print('Data loaded')
 
-    def plot(self, x, y):
-        style.use('fivethirtyeight')
-        fig = plt.figure()
-        ax1 = fig.add_subplot(1, 1, 1)
-        ax1.set_ylim(0, 2)
+    @staticmethod
+    def plot(x, last_10, xlabel='', ylabel='', title='', ymax=None):
+        plt.ion()
 
-        plt.plot(x, y)
-        plt.show()
-        plt.savefig("iterationTime.png")
+        display.clear_output()
+        display.display(plt.gcf())
+        plt.clf()
+        plt.title(title)
+        plt.xlabel(xlabel)
+        plt.ylabel(ylabel)
+
+        plt.plot(last_10)
+        plt.plot(x)
+
+        plt.ylim(ymin=0, ymax=ymax)
+
+        plt.show(block=True)
+
 
     def joakims_plot(self):
 
