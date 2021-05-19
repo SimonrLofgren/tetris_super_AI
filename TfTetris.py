@@ -121,7 +121,7 @@ class Agent:
 #   return state
 
 if __name__ == '__main__':
-
+    SPLIT_THRESH = 0.0003
     EPISODES = 3000
     env = gym_tetris.make('TetrisA-v0')
     env = JoypadSpace(env, SIMPLE_MOVEMENT)
@@ -180,6 +180,6 @@ if __name__ == '__main__':
 
             st.t()
             splits = st.timer()
-            [print(f'split {i+1}: {splits[i]}') for i in range(len(splits)) if splits[i] > 0.3]
+            [print(f'split {i+1}: {splits[i]}') for i in range(len(splits)) if splits[i] > SPLIT_THRESH]
 
     env.close()
