@@ -63,11 +63,12 @@ class Statistics:
         for t in self.times:
             splits.append(t - self.times[0])
         self.times = []
-        return splits
+        return splits[1:len(splits)]
 
     def t(self):
         t = time.perf_counter()
         self.times.append(t)
+
 
     def statistics(self, st, score, e):
 
