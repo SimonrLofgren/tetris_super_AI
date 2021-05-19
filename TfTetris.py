@@ -13,8 +13,6 @@ from tensorflow.python.keras.optimizers import Adam
 from statistics import Statistics
 from minimize import Minimize
 
-
-
 load_model = False
 
 
@@ -51,10 +49,12 @@ class Agent:
 
     def build_model(self):
         model = Sequential()
-        model.add(Dense(200, input_dim=self.state_input_size, activation='relu'))#State is input
+        model.add(Dense(200, input_dim=self.state_input_size,
+                        activation='relu'))  # State is input
         model.add(Dense(120, activation='relu'))
         model.add(Dense(60, activation='relu'))
-        model.add(Dense(self.number_of_actions, activation='linear'))#Q_Value of each action is Output
+        model.add(Dense(self.number_of_actions,
+                        activation='linear'))  # Q_Value of each action is Output
         model.summary()
         model.compile(loss='mse', optimizer=Adam(lr=self.learning_rate))
         return model
@@ -108,7 +108,7 @@ class Agent:
                        epochs=1, verbose=0)
 
 
-#ef minimize(state):
+# ef minimize(state):
 #   state = cv2.cvtColor(state, cv2.COLOR_RGB2GRAY)
 #   (thresh, state) = cv2.threshold(state, 0, 255,
 #                                   cv2.THRESH_BINARY)
@@ -126,11 +126,11 @@ if __name__ == '__main__':
     env = gym_tetris.make('TetrisA-v0')
     env = JoypadSpace(env, SIMPLE_MOVEMENT)
     print(SIMPLE_MOVEMENT)
-    cv2.namedWindow('ComWin', cv2.WINDOW_NORMAL) #make so the comåpputor window is reziseble
+    cv2.namedWindow('ComWin', cv2.WINDOW_NORMAL) # make so the computer window is resizable
     env.reset()
 
     # get size of state and action from environment
-    state_input_size = 200
+    state_input_size = 200 #adjusted computer input size
     number_of_actions = env.action_space.n
 
     agent = Agent(state_input_size, number_of_actions)
@@ -143,7 +143,7 @@ if __name__ == '__main__':
     plot_mean = []
     plot_scores = []
     for e in range(1, EPISODES):
-        st.t() #Statistics Time
+        st.t()  # Statistics Time
         st.episodes.append(e)
         done = False
         score = 0
@@ -157,8 +157,8 @@ if __name__ == '__main__':
             action = agent.get_action(state)
             next_state, reward, done, info = env.step(action)
             next_state = Minimize(next_state)
-            cv2.imshow('ComWin', next_state)
-            next_state = np.ndarray.flatten(next_state) #flatten 10 by 20 to 1 by 200
+            cv2.imshow('ComWin', next_state)  # render computer window
+            next_state = np.ndarray.flatten(next_state)  # flatten 10 by 20 to 1 by 200
             # save the sample <s, a, r, s'> to the replay memory
             agent.append_sample(state, action, reward, next_state, done)
             # every time step do the training
@@ -177,7 +177,6 @@ if __name__ == '__main__':
                       len(agent.memory), "  epsilon:", agent.epsilon)
 
                 st.statistics(st, score, e)
-
 
             if (e % 50 == 0) & (load_model == False):
                 agent.model.save_weights("tetris.h5")
