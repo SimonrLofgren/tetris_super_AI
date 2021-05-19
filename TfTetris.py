@@ -9,7 +9,7 @@ import numpy as np
 from tensorflow.python.keras import Sequential
 from tensorflow.python.keras.layers import Dense
 #from tensorflow.python.keras.optimizers import Adam  #alla andra
-from tensorflow.python.keras.optimizers import Adam  # Henrik
+from tensorflow.keras.optimizers import Adam  # Henrik
 
 from statistics import Statistics
 from minimize import Minimize
@@ -128,7 +128,7 @@ if __name__ == '__main__':
     scores, episodes = [], []
 
     st = Statistics([], [], [0] * 10, [], 0, [], [], [])
-
+    Statistics.save_data([], filename='meanIterTimes')
     for e in range(1, EPISODES):
         st.t()  # Statistics Time
         st.episodes.append(e)
@@ -184,10 +184,18 @@ if __name__ == '__main__':
                 print("episode:", e, "  score:", score, "  memory length:",
                       len(agent.memory), "  epsilon:", agent.epsilon)
 
+                data = [mean_splits, last_10]
+                st.save_data(data, filename=f'statistics_data/statistics{r}')
+
+                mean_iter_times = Statistics.load_data(filename='meanIterTimes.pkl')
+                mean_iter_times = mean_iter_times[0]
+                mean_iter_times.append(sum_splits/counter)
+                Statistics.save_data(mean_iter_times, filename='meanIterTimes')
+
                 st.statistics(score, e)
 
             if (e % 50 == 0) & (load_model == False):
-                agent.model.save_weights(f"tetris{r}.h5")
+                agent.model.save_weights(f"tetris.h5")
 
             st.t()
             splits = st.timer()
@@ -203,11 +211,7 @@ if __name__ == '__main__':
             mean_splits.append(mean_split)
 
             # st.plot(mean_splits, last_10, ylabel='Time', xlabel='iteration', title="IterationAverageTime...")
-            DATA_SAVE += 1
-            if DATA_SAVE == 500 or done:
-                data = [mean_splits, last_10]
-                st.save_data(data, filename=f'statistics_data/statistics{r}')
-                DATA_SAVE = 0
+
             counter += 1
 
     env.close()
