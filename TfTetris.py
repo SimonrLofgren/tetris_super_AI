@@ -8,8 +8,11 @@ from collections import deque
 import numpy as np
 from tensorflow.python.keras import Sequential
 from tensorflow.python.keras.layers import Dense
-from tensorflow.keras.optimizers import Adam
+from tensorflow.python.keras.optimizers import Adam
+
 from statistics import Statistics
+from minimize import Minimize
+
 
 
 EPISODES = 1500
@@ -104,6 +107,18 @@ class Agent:
                        epochs=1, verbose=0)
 
 
+#ef minimize(state):
+#   state = cv2.cvtColor(state, cv2.COLOR_RGB2GRAY)
+#   (thresh, state) = cv2.threshold(state, 0, 255,
+#                                   cv2.THRESH_BINARY)
+
+#   state = np.delete(state, range(0, 96), axis=1)
+#   state = np.delete(state, range(0, 48), axis=0)
+#   state = np.delete(state, range(80, 160), axis=1)
+#   state = np.delete(state, range(160, 192), axis=0)
+
+#   return state
+
 if __name__ == '__main__':
 
     EPISODES = 3000
@@ -128,12 +143,12 @@ if __name__ == '__main__':
     plot_mean = []
     plot_scores = []
     for e in range(1, EPISODES):
-        st.t()
+        st.t() #Statistics Time
         st.episodes.append(e)
         done = False
         score = 0
         state = env.reset()
-        state = np.reshape(state, [-1, state_input_size])
+        state = Minimize(state)
         lives = 3
         while not done:
             st.t()
@@ -141,7 +156,7 @@ if __name__ == '__main__':
             # get action for the current state and go one step in environment
             action = agent.get_action(state)
             next_state, reward, done, info = env.step(action)
-            next_state = np.reshape(next_state, [-1, state_input_size])
+            next_state = Minimize(next_state)
             # save the sample <s, a, r, s'> to the replay memory
             agent.append_sample(state, action, reward, next_state, done)
             # every time step do the training
