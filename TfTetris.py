@@ -64,6 +64,8 @@ class Agent:
         if np.random.rand() <= self.epsilon:
             return random.randrange(self.number_of_actions)
         else:
+            if state.ndim == 1:
+                state = np.array([state])
             q_value = self.model.predict(state)
             return np.argmax(q_value[0])
 
@@ -122,10 +124,9 @@ if __name__ == '__main__':
 
     EPISODES = 3000
     env = gym_tetris.make('TetrisA-v0')
-    SIMPLE_MOVEMENT.pop(0)
     env = JoypadSpace(env, SIMPLE_MOVEMENT)
     print(SIMPLE_MOVEMENT)
-    cv2.namedWindow('ComWin', cv2.WINDOW_NORMAL)
+    cv2.namedWindow('ComWin', cv2.WINDOW_NORMAL) #make so the comåpputor window is reziseble
     env.reset()
 
     # get size of state and action from environment
