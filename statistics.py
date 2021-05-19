@@ -36,7 +36,7 @@ class Statistics:
         plt.show()
         plt.savefig("iterationTime.png")
 
-    def joakims_plot(self, st):
+    def joakims_plot(self):
 
         plt.ion()
 
@@ -47,14 +47,14 @@ class Statistics:
         plt.xlabel("Number of Games")
         plt.ylabel("Score")
 
-        plt.plot(st.plot_scores)
-        plt.plot(st.plot_mean)
-        plt.plot(st.plot_last_10_mean)
+        plt.plot(self.plot_scores)
+        plt.plot(self.plot_mean)
+        plt.plot(self.plot_last_10_mean)
         plt.ylim(ymin=0)
 
-        plt.text(len(st.plot_scores) - 1, st.plot_scores[-1], str(st.plot_scores[-1]))
-        plt.text(len(st.plot_mean) - 1, st.plot_mean[-1], str(st.plot_mean[-1]))
-        plt.text(len(st.plot_last_10_mean) - 1, st.plot_last_10_mean[-1], str(st.plot_last_10_mean[-1]))
+        plt.text(len(self.plot_scores) - 1, self.plot_scores[-1], str(self.plot_scores[-1]))
+        plt.text(len(self.plot_mean) - 1, self.plot_mean[-1], str(self.plot_mean[-1]))
+        plt.text(len(self.plot_last_10_mean) - 1, self.plot_last_10_mean[-1], str(self.plot_last_10_mean[-1]))
         plt.show(block=False)
         plt.pause(.1)
         plt.savefig("joakims_plot.png")
@@ -71,18 +71,18 @@ class Statistics:
         self.times.append(t)
 
 
-    def statistics(self, st, score, e):
+    def statistics(self, score, e):
 
-        st.last_10_scores.append(score)
-        st.last_10_scores.pop(0)
+        self.last_10_scores.append(score)
+        self.last_10_scores.pop(0)
 
-        st.sum_all_scores += score
+        self.sum_all_scores += score
 
-        mean_score = st.sum_all_scores / (e + 1)
-        last_10_mean = sum(st.last_10_scores) / 10
-        st.plot_last_10_mean.append(last_10_mean)
-        st.plot_mean.append(mean_score)
+        mean_score = self.sum_all_scores / (e + 1)
+        last_10_mean = sum(self.last_10_scores) / 10
+        self.plot_last_10_mean.append(last_10_mean)
+        self.plot_mean.append(mean_score)
 
-        st.plot_scores.append(score)
+        self.plot_scores.append(score)
 
-        st.joakims_plot(st)
+        self.joakims_plot()

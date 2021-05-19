@@ -8,7 +8,7 @@ from collections import deque
 import numpy as np
 from tensorflow.python.keras import Sequential
 from tensorflow.python.keras.layers import Dense
-from tensorflow.python.keras.optimizers import Adam
+from tensorflow.keras.optimizers import Adam
 
 from statistics import Statistics
 from minimize import Minimize
@@ -121,7 +121,7 @@ class Agent:
 #   return state
 
 if __name__ == '__main__':
-    SPLIT_THRESH = 0.0003
+    SPLIT_THRESH = 0.2
     EPISODES = 3000
     env = gym_tetris.make('TetrisA-v0')
     env = JoypadSpace(env, SIMPLE_MOVEMENT)
@@ -173,7 +173,7 @@ if __name__ == '__main__':
                 print("episode:", e, "  score:", score, "  memory length:",
                       len(agent.memory), "  epsilon:", agent.epsilon)
 
-                st.statistics(st, score, e)
+                st.statistics(score, e)
 
             if (e % 50 == 0) & (load_model == False):
                 agent.model.save_weights("tetris.h5")
