@@ -137,7 +137,7 @@ if __name__ == '__main__':
 
     scores, episodes = [], []
 
-    st = Statistics([], [], [], [], [], [], [], [])
+    st = Statistics([], [], [0]*10, [], [], [], [], [])
 
     for e in range(1, EPISODES):
         st.t()  # Statistics Time
@@ -170,7 +170,8 @@ if __name__ == '__main__':
 
             state = next_state
             score += reward
-
+            if score >= 10:
+                done=True
             if done:
                 st.total_score.append(score)
                 scores.append(score)
