@@ -137,7 +137,7 @@ if __name__ == '__main__':
 
     scores, episodes = [], []
 
-    st = Statistics([], [], [0]*10, [], [], [], [], [])
+    st = Statistics([], [], [0]*10, [], 0, [], [], [])
 
     for e in range(1, EPISODES):
         st.t()  # Statistics Time
@@ -159,7 +159,7 @@ if __name__ == '__main__':
             env.render()
             # get action for the current state and go one step in environment
             action = agent.get_action(state)
-            next_state, reward, done, info = env.step(action)
+            next_state, reward, done, info = env.step(5)
             next_state = Minimize(next_state)
             cv2.imshow('ComWin', next_state)  # render computer window
             next_state = np.ndarray.flatten(next_state)  # flatten 10 by 20 to 1 by 200
@@ -172,6 +172,7 @@ if __name__ == '__main__':
             score += reward
             if score >= 10:
                 done=True
+
             if done:
                 st.total_score.append(score)
                 scores.append(score)
