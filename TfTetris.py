@@ -8,11 +8,11 @@ from collections import deque
 import numpy as np
 from tensorflow.python.keras import Sequential
 from tensorflow.python.keras.layers import Dense
-from tensorflow.keras.optimizers import Adam
+from tensorflow.python.keras.optimizers import Adam
+
 from statistics import Statistics
+from minimize import Minimize
 
-
-EPISODES = 1500
 load_model = False
 
 
@@ -49,10 +49,12 @@ class Agent:
 
     def build_model(self):
         model = Sequential()
-        model.add(Dense(240, input_dim=self.state_input_size, activation='relu'))#State is input
+        model.add(Dense(200, input_dim=self.state_input_size,
+                        activation='relu'))  # State is input
         model.add(Dense(120, activation='relu'))
         model.add(Dense(60, activation='relu'))
-        model.add(Dense(self.number_of_actions, activation='linear'))#Q_Value of each action is Output
+        model.add(Dense(self.number_of_actions,
+                        activation='linear'))  # Q_Value of each action is Output
         model.summary()
         model.compile(loss='mse', optimizer=Adam(lr=self.learning_rate))
         return model
@@ -62,6 +64,8 @@ class Agent:
         if np.random.rand() <= self.epsilon:
             return random.randrange(self.number_of_actions)
         else:
+            if state.ndim == 1:
+                state = np.array([state])
             q_value = self.model.predict(state)
             return np.argmax(q_value[0])
 
@@ -82,10 +86,10 @@ class Agent:
         action, reward, done = [], [], []
 
         for i in range(self.batch_size):
-            update_input[i] = mini_batch[i][0][0]
+            update_input[i] = mini_batch[i][0]
             action.append(mini_batch[i][1])
             reward.append(mini_batch[i][2])
-            update_target[i] = mini_batch[i][3][0]
+            update_target[i] = mini_batch[i][3]
             done.append(mini_batch[i][4])
 
         target = self.model.predict(update_input)
@@ -104,18 +108,29 @@ class Agent:
                        epochs=1, verbose=0)
 
 
+# ef minimize(state):
+#   state = cv2.cvtColor(state, cv2.COLOR_RGB2GRAY)
+#   (thresh, state) = cv2.threshold(state, 0, 255,
+#                                   cv2.THRESH_BINARY)
+
+#   state = np.delete(state, range(0, 96), axis=1)
+#   state = np.delete(state, range(0, 48), axis=0)
+#   state = np.delete(state, range(80, 160), axis=1)
+#   state = np.delete(state, range(160, 192), axis=0)
+
+#   return state
+
 if __name__ == '__main__':
 
     EPISODES = 3000
     env = gym_tetris.make('TetrisA-v0')
-    SIMPLE_MOVEMENT.pop(0)
     env = JoypadSpace(env, SIMPLE_MOVEMENT)
     print(SIMPLE_MOVEMENT)
-    cv2.namedWindow('ComWin', cv2.WINDOW_NORMAL)
+    cv2.namedWindow('ComWin', cv2.WINDOW_NORMAL) # make so the computer window is resizable
     env.reset()
 
     # get size of state and action from environment
-    state_input_size = env.observation_space.shape[0]
+    state_input_size = 200 #adjusted computer input size
     number_of_actions = env.action_space.n
 
     agent = Agent(state_input_size, number_of_actions)
@@ -125,20 +140,22 @@ if __name__ == '__main__':
     st = Statistics([], [], [], [], [], [], [], [])
 
     for e in range(1, EPISODES):
-        st.t()
+        st.t()  # Statistics Time
         st.episodes.append(e)
         done = False
         score = 0
         state = env.reset()
-        state = np.reshape(state, [-1, state_input_size])
-        lives = 3
+        state = Minimize(state)
+        state = np.ndarray.flatten(state)
         while not done:
             st.t()
             env.render()
             # get action for the current state and go one step in environment
             action = agent.get_action(state)
             next_state, reward, done, info = env.step(action)
-            next_state = np.reshape(next_state, [-1, state_input_size])
+            next_state = Minimize(next_state)
+            cv2.imshow('ComWin', next_state)  # render computer window
+            next_state = np.ndarray.flatten(next_state)  # flatten 10 by 20 to 1 by 200
             # save the sample <s, a, r, s'> to the replay memory
             agent.append_sample(state, action, reward, next_state, done)
             # every time step do the training
@@ -157,7 +174,6 @@ if __name__ == '__main__':
                       len(agent.memory), "  epsilon:", agent.epsilon)
 
                 st.statistics(st, score, e)
-
 
             if (e % 50 == 0) & (load_model == False):
                 agent.model.save_weights("tetris.h5")
