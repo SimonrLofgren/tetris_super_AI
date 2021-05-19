@@ -24,7 +24,7 @@ class Agent:
             self.learning_rate = 0.1
             self.epsilon = 0.1
             self.epsilon_min = 0.1
-            self.epsilon_decay = 0.9
+            self.epsilon_decay = 0.999
             self.batch_size = 512
             self.training_start = 1000
             self.discount_factor = 0.99
@@ -34,14 +34,14 @@ class Agent:
             self.state_input_size = state_input_size
             self.number_of_actions = number_of_actions
             self.learning_rate = 0.1
-            self.epsilon = 1.0
-            self.epsilon_min = 0.1
-            self.epsilon_decay = 0.9
+            self.epsilon = 1.0  # how much random nes. 1 = 100%, 0 = 0%
+            self.epsilon_min = 0.3
+            self.epsilon_decay = 0.9999
             self.batch_size = 512
             self.training_start = 1000
             self.discount_factor = 0.99
 
-        self.memory = deque(maxlen=2000)
+        self.memory = deque(maxlen=20000)
         self.model = self.build_model()
 
         if load_model:
@@ -105,7 +105,7 @@ class Agent:
 
         # and do the model fit!
         self.model.fit(update_input, target, batch_size=self.batch_size,
-                       epochs=1, verbose=0)
+                       epochs=10, verbose=0)
 
 
 # ef minimize(state):
@@ -123,14 +123,15 @@ class Agent:
 if __name__ == '__main__':
 
     EPISODES = 3000
-    env = gym_tetris.make('TetrisA-v0')
+    env = gym_tetris.make('TetrisA-v3')
     env = JoypadSpace(env, SIMPLE_MOVEMENT)
     print(SIMPLE_MOVEMENT)
-    cv2.namedWindow('ComWin', cv2.WINDOW_NORMAL) # make so the computer window is resizable
+    cv2.namedWindow('ComWin',
+                    cv2.WINDOW_NORMAL)  # make so the computer window is resizable
     env.reset()
 
     # get size of state and action from environment
-    state_input_size = 200 #adjusted computer input size
+    state_input_size = 200  # adjusted computer input size
     number_of_actions = env.action_space.n
 
     agent = Agent(state_input_size, number_of_actions)
@@ -147,19 +148,35 @@ if __name__ == '__main__':
         state = env.reset()
         state = Minimize(state)
         state = np.ndarray.flatten(state)
+        frames = 0
+        action = agent.get_action(state)
         while not done:
             st.t()
-            env.render()
+            if frames == 15:
+                env.render()
+
             # get action for the current state and go one step in environment
-            action = agent.get_action(state)
-            next_state, reward, done, info = env.step(action)
+
+            if frames == 15:
+                action = agent.get_action(state)
+                next_state, reward, done, info = env.step(action)
+                frames = 0
+            else:
+                if action == 5:
+                    next_state, reward, done, info = env.step(action)
+                else:
+                    next_state, reward, done, info = env.step(0)
+                frames += 1
             next_state = Minimize(next_state)
             cv2.imshow('ComWin', next_state)  # render computer window
-            next_state = np.ndarray.flatten(next_state)  # flatten 10 by 20 to 1 by 200
+            next_state = np.ndarray.flatten(
+                next_state)  # flatten 10 by 20 to 1 by 200
             # save the sample <s, a, r, s'> to the replay memory
             agent.append_sample(state, action, reward, next_state, done)
-            # every time step do the training
-            agent.train_model()
+            if frames == 15:
+
+                # every time step do the training
+                agent.train_model()
 
             state = next_state
             score += reward
@@ -173,13 +190,13 @@ if __name__ == '__main__':
                 print("episode:", e, "  score:", score, "  memory length:",
                       len(agent.memory), "  epsilon:", agent.epsilon)
 
-                st.statistics(st, score, e)
+                # st.statistics(st, score, e)
 
             if (e % 50 == 0) & (load_model == False):
                 agent.model.save_weights("tetris.h5")
 
-            st.t()
-            splits = st.timer()
-            [print(f'split {i+1}: {splits[i]}') for i in range(len(splits)) if splits[i] > 0.3]
+            # st.t()
+            # splits = st.timer()
+            # [print(f'split {i+1}: {splits[i]} frame{frames}') for i in range(len(splits)) if splits[i] > 0.07]
 
     env.close()
