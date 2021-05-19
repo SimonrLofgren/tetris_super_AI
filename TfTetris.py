@@ -8,7 +8,8 @@ from collections import deque
 import numpy as np
 from tensorflow.python.keras import Sequential
 from tensorflow.python.keras.layers import Dense
-from tensorflow.python.keras.optimizers import Adam
+#from tensorflow.python.keras.optimizers import Adam  #alla andra
+from tensorflow.python.keras.optimizers import Adam  # Henrik
 
 from statistics import Statistics
 from minimize import Minimize
@@ -108,18 +109,6 @@ class Agent:
                        epochs=10, verbose=0)
 
 
-# ef minimize(state):
-#   state = cv2.cvtColor(state, cv2.COLOR_RGB2GRAY)
-#   (thresh, state) = cv2.threshold(state, 0, 255,
-#                                   cv2.THRESH_BINARY)
-
-#   state = np.delete(state, range(0, 96), axis=1)
-#   state = np.delete(state, range(0, 48), axis=0)
-#   state = np.delete(state, range(80, 160), axis=1)
-#   state = np.delete(state, range(160, 192), axis=0)
-
-#   return state
-
 if __name__ == '__main__':
     SPLIT_THRESH = 0.2
     EPISODES = 3000
@@ -138,7 +127,7 @@ if __name__ == '__main__':
 
     scores, episodes = [], []
 
-    st = Statistics([], [], [0]*10, [], 0, [], [], [])
+    st = Statistics([], [], [0] * 10, [], 0, [], [], [])
 
     for e in range(1, EPISODES):
         st.t()  # Statistics Time
@@ -181,14 +170,11 @@ if __name__ == '__main__':
             # save the sample <s, a, r, s'> to the replay memory
             agent.append_sample(state, action, reward, next_state, done)
             if frames == 15:
-
                 # every time step do the training
                 agent.train_model()
 
             state = next_state
             score += reward
-            if score >= 10:
-                done=True
             if done:
                 st.total_score.append(score)
                 scores.append(score)
@@ -205,7 +191,8 @@ if __name__ == '__main__':
 
             st.t()
             splits = st.timer()
-            [print(f'split {i+1}: {splits[i]}') for i in range(len(splits)) if splits[i] > SPLIT_THRESH]
+            [print(f'split {i + 1}: {splits[i]}') for i in range(len(splits))
+             if splits[i] > SPLIT_THRESH]
 
             counters.append(counter)
 
@@ -215,16 +202,12 @@ if __name__ == '__main__':
             mean_split = sum_splits / counter
             mean_splits.append(mean_split)
 
-
             # st.plot(mean_splits, last_10, ylabel='Time', xlabel='iteration', title="IterationAverageTime...")
             DATA_SAVE += 1
             if DATA_SAVE == 500 or done:
                 data = [mean_splits, last_10]
                 st.save_data(data, filename=f'statistics_data/statistics{r}')
                 DATA_SAVE = 0
-            print(counter)
             counter += 1
-
-
 
     env.close()
