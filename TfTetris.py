@@ -8,7 +8,7 @@ from collections import deque
 import numpy as np
 from tensorflow.python.keras import Sequential
 from tensorflow.python.keras.layers import Dense
-from tensorflow.python.keras.optimizers import Adam
+from tensorflow.keras.optimizers import Adam
 
 from statistics import Statistics
 from minimize import Minimize
@@ -143,6 +143,7 @@ if __name__ == '__main__':
         st.t()  # Statistics Time
         st.episodes.append(e)
         done = False
+        save_point = 0
         score = 0
         state = env.reset()
         state = Minimize(state)
@@ -175,7 +176,8 @@ if __name__ == '__main__':
 
                 st.statistics(st, score, e)
 
-            if (e % 50 == 0) & (load_model == False):
+            if (save_point < info['score']) & (load_model == False):
+                save_point = info['score']
                 agent.model.save_weights("tetris.h5")
 
             st.t()
