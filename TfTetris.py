@@ -15,7 +15,6 @@ from minimize import Minimize
 
 
 
-EPISODES = 1500
 load_model = False
 
 
@@ -52,7 +51,7 @@ class Agent:
 
     def build_model(self):
         model = Sequential()
-        model.add(Dense(240, input_dim=self.state_input_size, activation='relu'))#State is input
+        model.add(Dense(200, input_dim=self.state_input_size, activation='relu'))#State is input
         model.add(Dense(120, activation='relu'))
         model.add(Dense(60, activation='relu'))
         model.add(Dense(self.number_of_actions, activation='linear'))#Q_Value of each action is Output
@@ -130,7 +129,7 @@ if __name__ == '__main__':
     env.reset()
 
     # get size of state and action from environment
-    state_input_size = env.observation_space.shape[0]
+    state_input_size = 200
     number_of_actions = env.action_space.n
 
     agent = Agent(state_input_size, number_of_actions)
@@ -149,7 +148,6 @@ if __name__ == '__main__':
         score = 0
         state = env.reset()
         state = Minimize(state)
-        lives = 3
         while not done:
             st.t()
             env.render()
@@ -157,6 +155,8 @@ if __name__ == '__main__':
             action = agent.get_action(state)
             next_state, reward, done, info = env.step(action)
             next_state = Minimize(next_state)
+            cv2.imshow('ComWin', next_state)
+            next_state = np.ndarray.flatten(next_state) #flatten 10 by 20 to 1 by 200
             # save the sample <s, a, r, s'> to the replay memory
             agent.append_sample(state, action, reward, next_state, done)
             # every time step do the training
