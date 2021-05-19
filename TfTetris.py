@@ -38,7 +38,7 @@ class Agent:
             self.epsilon_min = 0.1
             self.epsilon_decay = 0.9
             self.batch_size = 512
-            self.training_start = 1000
+            self.training_start = 512
             self.discount_factor = 0.99
 
         self.memory = deque(maxlen=2000)
@@ -51,8 +51,8 @@ class Agent:
         model = Sequential()
         model.add(Dense(200, input_dim=self.state_input_size,
                         activation='relu'))  # State is input
-        model.add(Dense(120, activation='relu'))
         model.add(Dense(60, activation='relu'))
+        model.add(Dense(24, activation='relu'))
         model.add(Dense(self.number_of_actions,
                         activation='linear'))  # Q_Value of each action is Output
         model.summary()
@@ -121,7 +121,7 @@ class Agent:
 #   return state
 
 if __name__ == '__main__':
-
+    SPLIT_THRESH = 0.2
     EPISODES = 3000
     env = gym_tetris.make('TetrisA-v0')
     env = JoypadSpace(env, SIMPLE_MOVEMENT)
@@ -137,7 +137,7 @@ if __name__ == '__main__':
 
     scores, episodes = [], []
 
-    st = Statistics([], [], [], [], [], [], [], [])
+    st = Statistics([], [], [0]*10, [], [], [], [], [])
 
     for e in range(1, EPISODES):
         st.t()  # Statistics Time
@@ -148,6 +148,13 @@ if __name__ == '__main__':
         state = env.reset()
         state = Minimize(state)
         state = np.ndarray.flatten(state)
+        sum_splits = 0
+        counter = 1
+        mean_splits = []
+        counters = []
+        last_10 = []
+        DATA_SAVE = 0
+        r = random.randrange(1, 10000)
         while not done:
             st.t()
             env.render()
@@ -164,7 +171,8 @@ if __name__ == '__main__':
 
             state = next_state
             score += reward
-
+            if score >= 10:
+                done=True
             if done:
                 st.total_score.append(score)
                 scores.append(score)
@@ -174,7 +182,7 @@ if __name__ == '__main__':
                 print("episode:", e, "  score:", score, "  memory length:",
                       len(agent.memory), "  epsilon:", agent.epsilon)
 
-                st.statistics(st, score, e)
+                st.statistics(score, e)
 
             if (save_point < info['score']) & (load_model == False):
                 save_point = info['score']
@@ -182,6 +190,26 @@ if __name__ == '__main__':
 
             st.t()
             splits = st.timer()
-            [print(f'split {i+1}: {splits[i]}') for i in range(len(splits)) if splits[i] > 0.3]
+            [print(f'split {i+1}: {splits[i]}') for i in range(len(splits)) if splits[i] > SPLIT_THRESH]
+
+            counters.append(counter)
+
+            last_10.append(splits[0])
+
+            sum_splits += splits[0]
+            mean_split = sum_splits / counter
+            mean_splits.append(mean_split)
+
+
+            # st.plot(mean_splits, last_10, ylabel='Time', xlabel='iteration', title="IterationAverageTime...")
+            DATA_SAVE += 1
+            if DATA_SAVE == 500:
+                data = [mean_splits, last_10]
+                st.save_data(data, filename=f'statistics_data/statistics{r}')
+                DATA_SAVE = 0
+            print(counter)
+            counter += 1
+
+
 
     env.close()

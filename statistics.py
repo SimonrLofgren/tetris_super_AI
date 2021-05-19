@@ -17,26 +17,37 @@ class Statistics:
         self.plot_mean = plot_mean
         self.plot_scores = plot_scores
 
-    def save_data(self, data, filename):
+    @staticmethod
+    def save_data(data, filename):
         with open(str(filename) + '.pkl', 'wb') as f:
             pickle.dump(data, f)
         print('Data saved.')
 
-    def load_data(self, data):
-        with open(str(data)) as f:
+    @staticmethod
+    def load_data(filename):
+        with open(str(filename), 'rb') as f:
             return pickle.load(f), print('Data loaded')
 
-    def plot(self, x, y):
-        style.use('fivethirtyeight')
-        fig = plt.figure()
-        ax1 = fig.add_subplot(1, 1, 1)
-        ax1.set_ylim(0, 2)
+    @staticmethod
+    def plot(x, last_10, xlabel='', ylabel='', title='', ymax=None):
+        plt.ion()
 
-        plt.plot(x, y)
-        plt.show()
-        plt.savefig("iterationTime.png")
+        display.clear_output()
+        display.display(plt.gcf())
+        plt.clf()
+        plt.title(title)
+        plt.xlabel(xlabel)
+        plt.ylabel(ylabel)
 
-    def joakims_plot(self, st):
+        plt.plot(last_10)
+        plt.plot(x)
+
+        plt.ylim(ymin=0, ymax=ymax)
+
+        plt.show(block=True)
+
+
+    def joakims_plot(self):
 
         plt.ion()
 
@@ -47,14 +58,14 @@ class Statistics:
         plt.xlabel("Number of Games")
         plt.ylabel("Score")
 
-        plt.plot(st.plot_scores)
-        plt.plot(st.plot_mean)
-        plt.plot(st.plot_last_10_mean)
+        plt.plot(self.plot_scores)
+        plt.plot(self.plot_mean)
+        plt.plot(self.plot_last_10_mean)
         plt.ylim(ymin=0)
 
-        plt.text(len(st.plot_scores) - 1, st.plot_scores[-1], str(st.plot_scores[-1]))
-        plt.text(len(st.plot_mean) - 1, st.plot_mean[-1], str(st.plot_mean[-1]))
-        plt.text(len(st.plot_last_10_mean) - 1, st.plot_last_10_mean[-1], str(st.plot_last_10_mean[-1]))
+        plt.text(len(self.plot_scores) - 1, self.plot_scores[-1], str(self.plot_scores[-1]))
+        plt.text(len(self.plot_mean) - 1, self.plot_mean[-1], str(self.plot_mean[-1]))
+        plt.text(len(self.plot_last_10_mean) - 1, self.plot_last_10_mean[-1], str(self.plot_last_10_mean[-1]))
         plt.show(block=False)
         plt.pause(.1)
         plt.savefig("joakims_plot.png")
@@ -71,18 +82,18 @@ class Statistics:
         self.times.append(t)
 
 
-    def statistics(self, st, score, e):
+    def statistics(self, score, e):
 
-        st.last_10_scores.append(score)
-        st.last_10_scores.pop(0)
+        self.last_10_scores.append(score)
+        self.last_10_scores.pop(0)
 
-        st.sum_all_scores += score
+        self.sum_all_scores += score
 
-        mean_score = st.sum_all_scores / (e + 1)
-        last_10_mean = sum(st.last_10_scores) / 10
-        st.plot_last_10_mean.append(last_10_mean)
-        st.plot_mean.append(mean_score)
+        mean_score = self.sum_all_scores / (e + 1)
+        last_10_mean = sum(self.last_10_scores) / 10
+        self.plot_last_10_mean.append(last_10_mean)
+        self.plot_mean.append(mean_score)
 
-        st.plot_scores.append(score)
+        self.plot_scores.append(score)
 
-        st.joakims_plot(st)
+        self.joakims_plot()
