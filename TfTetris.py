@@ -121,7 +121,7 @@ class Agent:
 #   return state
 
 if __name__ == '__main__':
-    SPLIT_THRESH = 0.0003
+    SPLIT_THRESH = 0.2
     EPISODES = 3000
     env = gym_tetris.make('TetrisA-v0')
     env = JoypadSpace(env, SIMPLE_MOVEMENT)
