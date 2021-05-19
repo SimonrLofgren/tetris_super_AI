@@ -170,8 +170,6 @@ if __name__ == '__main__':
 
             state = next_state
             score += reward
-            if score >= 10:
-                done=True
 
             if done:
                 st.total_score.append(score)
@@ -185,7 +183,7 @@ if __name__ == '__main__':
                 st.statistics(score, e)
 
             if (e % 50 == 0) & (load_model == False):
-                agent.model.save_weights("tetris.h5")
+                agent.model.save_weights(f"tetris{r}.h5")
 
             st.t()
             splits = st.timer()
@@ -202,7 +200,7 @@ if __name__ == '__main__':
 
             # st.plot(mean_splits, last_10, ylabel='Time', xlabel='iteration', title="IterationAverageTime...")
             DATA_SAVE += 1
-            if DATA_SAVE == 500:
+            if DATA_SAVE == 500 or done:
                 data = [mean_splits, last_10]
                 st.save_data(data, filename=f'statistics_data/statistics{r}')
                 DATA_SAVE = 0
