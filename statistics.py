@@ -4,12 +4,18 @@ from IPython import display
 import pickle
 import time
 
+
 class Statistics:
-    def __init__(self, episodes, total_score, last_10_scores, times):
+    def __init__(self, episodes, total_score, last_10_scores, times, sum_all_scores,
+                 plot_last_10_mean, plot_mean, plot_scores):
         self.episodes = episodes
         self.total_score = total_score
         self.last_10_scores = last_10_scores
         self.times = times
+        self.sum_all_scores = sum_all_scores
+        self.plot_last_10_mean = plot_last_10_mean
+        self.plot_mean = plot_mean
+        self.plot_scores = plot_scores
 
     def save_data(self, data, filename):
         with open(str(filename) + '.pkl', 'wb') as f:
@@ -63,3 +69,18 @@ class Statistics:
         t = time.perf_counter()
         self.times.append(t)
 
+    def statistics(self, st, score, e):
+
+        st.last_10_scores.append(score)
+        st.last_10_scores.pop(0)
+
+        st.sum_all_scores += score
+
+        mean_score = st.sum_all_scores / (e + 1)
+        last_10_mean = sum(st.last_10_scores) / 10
+        st.plot_last_10_mean.append(last_10_mean)
+        st.plot_mean.append(mean_score)
+
+        st.plot_scores.append(score)
+
+        st.joakims_plot(st.plot_scores, st.plot_mean, st.plot_last_10_mean)

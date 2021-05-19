@@ -159,16 +159,7 @@ if __name__ == '__main__':
                 print("episode:", e, "  score:", score, "  memory length:",
                       len(agent.memory), "  epsilon:", agent.epsilon)
 
-
-                st.last_10_scores.append(score)
-                st.last_10_scores.pop(0)
-                sum_all_scores += score
-                mean_score = sum_all_scores / (e+1)
-                last_10_mean = sum(st.last_10_scores) / 10
-                plot_last_10_mean.append(last_10_mean)
-                plot_mean.append(mean_score)
-                plot_scores.append(score)
-                st.joakims_plot(plot_scores, plot_mean, plot_last_10_mean)
+                st.statistics(st, score, e)
 
 
             if (e % 50 == 0) & (load_model == False):
