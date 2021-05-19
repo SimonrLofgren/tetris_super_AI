@@ -1,4 +1,3 @@
-
 import numpy as np  # pip install numpy
 import cv2  # pip install opencv-python
 import neat  # pip install neat-python
@@ -21,6 +20,7 @@ def minimize(state):
 
     return state
 
+
 class Worker(object):
     def __init__(self, genome, config):
         self.genome = genome
@@ -34,7 +34,7 @@ class Worker(object):
 
         self.env.reset()
         action = np.argmax(self.env.action_space.sample())
-        ob, _, _, _ = self.env.step(action)
+        ob, _, _, _ = self.env.step(int(action))
 
         inx = 10
         iny = 20
@@ -49,34 +49,31 @@ class Worker(object):
         counter = 0
         max_score = 0
         moving = 0
+        frames = 0
 
         while not done:
-            #self.env.render()
             scaledimg = cv2.cvtColor(ob, cv2.COLOR_BGR2RGB)
-            # scaledimg = cv2.resize(scaledimg, (iny, inx))
             ob = minimize(ob)
             ob = cv2.resize(ob, (10, 20))
 
             cv2.imshow('humanwin', scaledimg)
-            # cv2.imshow('comwin', ob)
             cv2.waitKey(1)
 
             imgarray = np.ndarray.flatten(ob)
-            # imgarray = np.interp(imgarray, (0, 254), (-1, +1))
+
             actions = net.activate(imgarray)
             action = np.argmax(actions)
-            ob, rew, done, info = self.env.step(action)
+            ob, rew, done, info = self.env.step(int(action))
 
-            xpos = info['score']
+            frames += 1
+            if frames == 1200:
+                fitness += 1
+                frames = 0
 
+        print(
+            f"genome:{self.genome.key} Fitnes: {fitness} lines: {info['number_of_lines']}")
 
-            if fitness < xpos:
-                fitness = xpos
-
-
-        print("genome:", self.genome.key, "Fitnes:", fitness)
-
-        return fitness
+        return int(fitness)
 
 
 def eval_genomes(genome, config):
@@ -91,14 +88,15 @@ def main():
 
     p = neat.Population(config)
 
-    #p = neat.Checkpointer.restore_checkpoint('neat-checkpoint-193')
+    p = neat.Checkpointer.restore_checkpoint(
+        'neat-checkpoint-110')  # load checkpoint
 
     p.add_reporter(neat.StdOutReporter(True))
     stats = neat.StatisticsReporter()
     p.add_reporter(stats)
-    p.add_reporter(neat.Checkpointer(10))
-
-    pe = neat.ParallelEvaluator(6, eval_genomes)
+    p.add_reporter(neat.Checkpointer(10))  # save checkpoint every "x" time
+    cores = 6  # multiprocessing cores
+    pe = neat.ParallelEvaluator(cores, eval_genomes)
 
     winner = p.run(pe.evaluate)
 
