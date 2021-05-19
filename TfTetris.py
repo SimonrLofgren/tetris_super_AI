@@ -8,7 +8,8 @@ from collections import deque
 import numpy as np
 from tensorflow.python.keras import Sequential
 from tensorflow.python.keras.layers import Dense
-from tensorflow.keras.optimizers import Adam
+#from tensorflow.python.keras.optimizers import Adam  #alla andra
+from tensorflow.python.keras.optimizers import Adam  # Henrik
 
 from statistics import Statistics
 from minimize import Minimize
@@ -34,14 +35,14 @@ class Agent:
             self.state_input_size = state_input_size
             self.number_of_actions = number_of_actions
             self.learning_rate = 0.1
-            self.epsilon = 1.0
-            self.epsilon_min = 0.1
-            self.epsilon_decay = 0.9
+            self.epsilon = 1.0  # how much random nes. 1 = 100%, 0 = 0%
+            self.epsilon_min = 0.3
+            self.epsilon_decay = 0.9999
             self.batch_size = 512
-            self.training_start = 512
+            self.training_start = 1000
             self.discount_factor = 0.99
 
-        self.memory = deque(maxlen=2000)
+        self.memory = deque(maxlen=20000)
         self.model = self.build_model()
 
         if load_model:
@@ -105,20 +106,8 @@ class Agent:
 
         # and do the model fit!
         self.model.fit(update_input, target, batch_size=self.batch_size,
-                       epochs=1, verbose=0)
+                       epochs=10, verbose=0)
 
-
-# ef minimize(state):
-#   state = cv2.cvtColor(state, cv2.COLOR_RGB2GRAY)
-#   (thresh, state) = cv2.threshold(state, 0, 255,
-#                                   cv2.THRESH_BINARY)
-
-#   state = np.delete(state, range(0, 96), axis=1)
-#   state = np.delete(state, range(0, 48), axis=0)
-#   state = np.delete(state, range(80, 160), axis=1)
-#   state = np.delete(state, range(160, 192), axis=0)
-
-#   return state
 
 if __name__ == '__main__':
     SPLIT_THRESH = 0.2
@@ -126,18 +115,19 @@ if __name__ == '__main__':
     env = gym_tetris.make('TetrisA-v0')
     env = JoypadSpace(env, SIMPLE_MOVEMENT)
     print(SIMPLE_MOVEMENT)
-    cv2.namedWindow('ComWin', cv2.WINDOW_NORMAL) # make so the computer window is resizable
+    cv2.namedWindow('ComWin',
+                    cv2.WINDOW_NORMAL)  # make so the computer window is resizable
     env.reset()
 
     # get size of state and action from environment
-    state_input_size = 200 #adjusted computer input size
+    state_input_size = 200  # adjusted computer input size
     number_of_actions = env.action_space.n
 
     agent = Agent(state_input_size, number_of_actions)
 
     scores, episodes = [], []
 
-    st = Statistics([], [], [0]*10, [], 0, [], [], [])
+    st = Statistics([], [], [0] * 10, [], 0, [], [], [])
 
     for e in range(1, EPISODES):
         st.t()  # Statistics Time
@@ -154,23 +144,37 @@ if __name__ == '__main__':
         last_10 = []
         DATA_SAVE = 0
         r = random.randrange(1, 10000)
+        frames = 0
+        action = agent.get_action(state)
         while not done:
             st.t()
-            env.render()
+            if frames == 15:
+                env.render()
+
             # get action for the current state and go one step in environment
-            action = agent.get_action(state)
-            next_state, reward, done, info = env.step(5)
+
+            if frames == 15:
+                action = agent.get_action(state)
+                next_state, reward, done, info = env.step(action)
+                frames = 0
+            else:
+                if action == 5:
+                    next_state, reward, done, info = env.step(action)
+                else:
+                    next_state, reward, done, info = env.step(0)
+                frames += 1
             next_state = Minimize(next_state)
             cv2.imshow('ComWin', next_state)  # render computer window
-            next_state = np.ndarray.flatten(next_state)  # flatten 10 by 20 to 1 by 200
+            next_state = np.ndarray.flatten(
+                next_state)  # flatten 10 by 20 to 1 by 200
             # save the sample <s, a, r, s'> to the replay memory
             agent.append_sample(state, action, reward, next_state, done)
-            # every time step do the training
-            agent.train_model()
+            if frames == 15:
+                # every time step do the training
+                agent.train_model()
 
             state = next_state
             score += reward
-
             if done:
                 st.total_score.append(score)
                 scores.append(score)
@@ -187,7 +191,8 @@ if __name__ == '__main__':
 
             st.t()
             splits = st.timer()
-            [print(f'split {i+1}: {splits[i]}') for i in range(len(splits)) if splits[i] > SPLIT_THRESH]
+            [print(f'split {i + 1}: {splits[i]}') for i in range(len(splits))
+             if splits[i] > SPLIT_THRESH]
 
             counters.append(counter)
 
@@ -197,16 +202,12 @@ if __name__ == '__main__':
             mean_split = sum_splits / counter
             mean_splits.append(mean_split)
 
-
             # st.plot(mean_splits, last_10, ylabel='Time', xlabel='iteration', title="IterationAverageTime...")
             DATA_SAVE += 1
             if DATA_SAVE == 500 or done:
                 data = [mean_splits, last_10]
                 st.save_data(data, filename=f'statistics_data/statistics{r}')
                 DATA_SAVE = 0
-            print(counter)
             counter += 1
-
-
 
     env.close()
