@@ -9,8 +9,8 @@ import numpy as np
 from tensorflow.python.keras import Sequential
 from tensorflow.python.keras.layers import Dense
 
-#from tensorflow.python.keras.optimizers import Adam  #alla andra
-from tensorflow.keras.optimizers import Adam  # Henrik
+#from tensorflow.python.keras.optimizers import Adam  #Henrik
+from tensorflow.keras.optimizers import Adam  # Alla andra
 
 from statistics import Statistics, init_csv
 from minimize import Minimize
