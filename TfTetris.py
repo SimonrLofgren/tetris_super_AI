@@ -9,10 +9,12 @@ import numpy as np
 from tensorflow.python.keras import Sequential
 from tensorflow.python.keras.layers import Dense
 
-#from tensorflow.python.keras.optimizers import Adam  #alla andra
+
+# from tensorflow.python.keras.optimizers import Adam  #alla andra
 from tensorflow.keras.optimizers import Adam  # Henrik
 
-from statistics import Statistics
+
+from statistics import Statistics, init_csv
 from minimize import Minimize
 
 load_model = False
@@ -113,6 +115,7 @@ if __name__ == '__main__':
 
     SPLIT_THRESH = 0.6
     EPISODES = 3000
+    save_point = 0
     env = gym_tetris.make('TetrisA-v0')
     env = JoypadSpace(env, SIMPLE_MOVEMENT)
     print(SIMPLE_MOVEMENT)
@@ -126,14 +129,12 @@ if __name__ == '__main__':
 
     agent = Agent(state_input_size, number_of_actions)
 
-    scores, episodes = [], []
-
     st = Statistics([], [], [0] * 10, [], 0, [], [], [])
     Statistics.save_data([], filename='meanIterTimes')
+    init_csv()
     for e in range(1, EPISODES):
         st.t()  # Statistics Time
-        st.episodes.append(e)
-        save_point = 0
+
         done = False
         score = 0
         state = env.reset()
@@ -142,13 +143,12 @@ if __name__ == '__main__':
         sum_splits = 0
         counter = 1
         mean_splits = []
-        last_10 = []
         DATA_SAVE = 0
         r = random.randrange(1, 10000)
         frames = 0
         action = agent.get_action(state)
-        lastsumstates = [0, 0, 0]
-        lastnewblock = 0
+        last_sum_states = [0, 0, 0]
+        last_new_block = 0
 
         while not done:
             st.t()
@@ -182,35 +182,28 @@ if __name__ == '__main__':
 
             state = next_state
 
-            newblock = info['statistics']
-            sumstates = [sum(score_state[-1]), sum(score_state[-2]), sum(score_state[-3])]
-            if newblock != lastnewblock:
-                for i, sumstate in enumerate(sumstates):
-                    if lastsumstates[i] < sumstate:
-                        reward += (20-i*5) * int((sumstate-lastsumstates[i])/255)
-                        lastsumstates[i] = sumstate
-            lastnewblock = newblock
-
-
+            new_block = info['statistics']
+            sum_states = [sum(score_state[-1]), sum(score_state[-2]), sum(score_state[-3])]
+            if new_block != last_new_block:
+                for i, sum_state in enumerate(sum_states):
+                    if last_sum_states[i] < sum_state:
+                        reward += (20-i*5) * int((sum_state-last_sum_states[i])/255)
+                        last_sum_states[i] = sum_state
+            last_new_block = new_block
 
             score += reward
+
             if done:
                 st.total_score.append(score)
-                scores.append(score)
-                episodes.append(e)
-                plt.plot(episodes, scores, 'b')
-                plt.savefig("tetris.png")
                 print("episode:", e, "  score:", score, "  memory length:",
                       len(agent.memory), "  epsilon:", agent.epsilon)
 
-                data = [mean_splits, last_10]
-                #st.save_data(data, filename=f'statistics_data/statistics{r}')
-
-                mean_iter_times = Statistics.load_data(filename='meanIterTimes.pkl')
+                """mean_iter_times = Statistics.load_data(filename='meanIterTimes.pkl')
                 mean_iter_times = mean_iter_times[0]
                 mean_iter_times.append(sum_splits/counter)
                 Statistics.plot(mean_iter_times, ymax=0.5, xlabel='episode', ylabel='Mean_time')
                 Statistics.save_data(mean_iter_times, filename='meanIterTimes')
+                mean_iter_times = 0"""
 
                 st.statistics(score, e)
 
@@ -218,19 +211,15 @@ if __name__ == '__main__':
                 save_point = info['score']
                 agent.model.save_weights(f"tetris.h5")
 
-            st.t()
+            """st.t()
             splits = st.timer()
             [print(f'split {i + 1}: {splits[i]}') for i in range(len(splits))
              if splits[i] > SPLIT_THRESH]
-
-            last_10.append(splits[0])
 
             sum_splits += splits[0]
             mean_split = sum_splits / counter
             mean_splits.append(mean_split)
 
-            # st.plot(mean_splits, last_10, ylabel='Time', xlabel='iteration', title="IterationAverageTime...")
-
-            counter += 1
+            counter += 1"""
 
     env.close()

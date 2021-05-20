@@ -1,8 +1,8 @@
 import matplotlib.pyplot as plt
-from matplotlib import style
 from IPython import display
 import pickle
 import time
+import csv
 
 
 class Statistics:
@@ -45,11 +45,9 @@ class Statistics:
         plt.plot(x2)
         plt.plot(last_10_2)
 
-
         plt.ylim(ymin=0, ymax=ymax)
 
         plt.show(block=True)
-
 
     def joakims_plot(self):
 
@@ -85,7 +83,6 @@ class Statistics:
         t = time.perf_counter()
         self.times.append(t)
 
-
     def statistics(self, score, e):
 
         self.last_10_scores.append(score)
@@ -93,15 +90,32 @@ class Statistics:
 
         self.sum_all_scores += score
 
-        mean_score = self.sum_all_scores / (e)
+        mean_score = self.sum_all_scores / e
         last_10_mean = sum(self.last_10_scores) / 10
 
-        self.plot_last_10_mean.append(last_10_mean)
+        '''self.plot_last_10_mean.append(last_10_mean)
         self.plot_mean.append(mean_score)
-        self.plot_scores.append(score)
+        self.plot_scores.append(score)'''
 
-        print(len(self.plot_last_10_mean))
-        print(len(self.plot_mean))
-        print(len(self.plot_scores))
+        data = [e, score,
+                mean_score,
+                last_10_mean]
 
-        self.joakims_plot()
+        with open('scores.csv', 'a', newline='') as f:
+            writer_object = csv.writer(f)
+            writer_object.writerow(data)
+
+            f.close()
+
+        # self.joakims_plot()
+
+
+def init_csv():
+
+    fields = ['Episode', 'Total Score', 'Average Score', 'Average Score Last 10']
+
+    with open('scores.csv', 'w', newline='') as f:
+        writer = csv.writer(f)
+        writer.writerow(fields)
+
+        f.close()
