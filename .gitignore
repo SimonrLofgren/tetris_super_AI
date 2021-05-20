@@ -1,2 +1,4 @@
 venv/
 .idea/
+scores.csv/
+tetris.h5/
