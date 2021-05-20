@@ -45,11 +45,9 @@ class Statistics:
         plt.plot(x2)
         plt.plot(last_10_2)
 
-
         plt.ylim(ymin=0, ymax=ymax)
 
         plt.show(block=True)
-
 
     def joakims_plot(self):
 
@@ -85,7 +83,6 @@ class Statistics:
         t = time.perf_counter()
         self.times.append(t)
 
-
     def statistics(self, score, e):
 
         self.last_10_scores.append(score)
@@ -100,11 +97,11 @@ class Statistics:
         self.plot_mean.append(mean_score)
         self.plot_scores.append(score)'''
 
-        data = [last_10_mean,
+        data = [e, score,
                 mean_score,
-                score]
+                last_10_mean]
 
-        with open('scores.csv', 'a') as f:
+        with open('scores.csv', 'a', newline='') as f:
             writer_object = csv.writer(f)
             writer_object.writerow(data)
 
@@ -112,11 +109,13 @@ class Statistics:
 
         # self.joakims_plot()
 
-def init_csv():
-    fields = ['last_10_mean', 'All_mean', 'Actual']
 
-    with open('scores.csv', 'w') as f:
-        dictwriter_object = csv.writer(f)
-        dictwriter_object.writerow(fields)
+def init_csv():
+
+    fields = ['Episode', 'Total Score', 'Average Score', 'Average Score Last 10']
+
+    with open('scores.csv', 'w', newline='') as f:
+        writer = csv.writer(f)
+        writer.writerow(fields)
 
         f.close()
