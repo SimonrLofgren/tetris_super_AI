@@ -148,6 +148,9 @@ if __name__ == '__main__':
         r = random.randrange(1, 10000)
         frames = 0
         action = agent.get_action(state)
+        lastsumstates = [0, 0, 0]
+        lastnewblock = 0
+
         while not done:
             st.t()
             if frames == 15:
@@ -165,17 +168,32 @@ if __name__ == '__main__':
                 else:
                     next_state, reward, done, info = env.step(0)
                 frames += 1
+
             next_state = Minimize(next_state)
             cv2.imshow('ComWin', next_state)  # render computer window
+            score_state = next_state
             next_state = np.ndarray.flatten(
                 next_state)  # flatten 10 by 20 to 1 by 200
             # save the sample <s, a, r, s'> to the replay memory
             agent.append_sample(state, action, reward, next_state, done)
+
             if frames == 15:
                 # every time step do the training
                 agent.train_model()
 
             state = next_state
+
+            newblock = info['statistics']
+            sumstates = [sum(score_state[-1]), sum(score_state[-2]), sum(score_state[-3])]
+            if newblock != lastnewblock:
+                for i, sumstate in enumerate(sumstates):
+                    if lastsumstates[i] < sumstate:
+                        reward += (20-i*5) * int((sumstate-lastsumstates[i])/255)
+                        lastsumstates[i] = sumstate
+            lastnewblock = newblock
+
+
+
             score += reward
             if done:
                 st.total_score.append(score)
