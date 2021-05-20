@@ -15,7 +15,7 @@ from tensorflow.keras.optimizers import Adam  # Henrik
 from statistics import Statistics
 from minimize import Minimize
 
-load_model = True
+load_model = False
 
 
 class Agent:
@@ -43,7 +43,7 @@ class Agent:
             self.training_start = 1000
             self.discount_factor = 0.99
 
-        self.memory = deque(maxlen=20000)
+        self.memory = deque(maxlen=2000)
         self.model = self.build_model()
 
         if load_model:
@@ -187,11 +187,12 @@ if __name__ == '__main__':
                       len(agent.memory), "  epsilon:", agent.epsilon)
 
                 data = [mean_splits, last_10]
-                st.save_data(data, filename=f'statistics_data/statistics{r}')
+                #st.save_data(data, filename=f'statistics_data/statistics{r}')
 
                 mean_iter_times = Statistics.load_data(filename='meanIterTimes.pkl')
                 mean_iter_times = mean_iter_times[0]
                 mean_iter_times.append(sum_splits/counter)
+                Statistics.plot(mean_iter_times, ymax=0.5, xlabel='episode', ylabel='Mean_time')
                 Statistics.save_data(mean_iter_times, filename='meanIterTimes')
 
                 st.statistics(score, e)
