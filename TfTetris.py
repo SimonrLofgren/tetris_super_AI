@@ -30,8 +30,7 @@ class Agent:
             self.batch_size = 512
             self.training_start = 1000
             self.discount_factor = 0.99
-            self.memory = deque(maxlen=2000)
-            self.model = self.build_model()
+
         else:
             self.state_input_size = state_input_size
             self.number_of_actions = number_of_actions
