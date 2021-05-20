@@ -6,6 +6,7 @@ def main():
     while running:
         print('1. one')
         print('2. two')
+        print('3. mean')
         inp = input('-: ')
         if inp == 'exit':
             running = False
@@ -25,7 +26,18 @@ def main():
                 mean_splits2 = data2[0]
                 last_10_2 = data2[1]
 
-                Statistics.plot(mean_splits, last_10, x2=mean_splits2, last_10_2=last_10_2, ymax=0.5)
+                Statistics.plot(mean_splits, last_10=last_10, x2=mean_splits2, last_10_2=last_10_2, ymax=0.5)
+            except:
+                print('not valid')
+
+        elif inp == '3':
+
+            try:
+                data = Statistics.load_data(f'meanIterTimes.pkl')
+                mean = data[0]
+
+
+                Statistics.plot(mean, ymax=0.5, xlabel='episode', ylabel='Mean_time')
             except:
                 print('not valid')
 
@@ -35,7 +47,7 @@ def main():
                 data = data[0]
                 mean_splits = data[0]
                 last_10 = data[1]
-                Statistics.plot(mean_splits, last_10, ymax=0.5)
+                Statistics.plot(mean_splits, last_10=last_10, ymax=0.5)
             except:
                 print('not valid')
 

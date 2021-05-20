@@ -29,7 +29,7 @@ class Statistics:
             return pickle.load(f), print('Data loaded')
 
     @staticmethod
-    def plot(x, last_10, x2=None, last_10_2=None, xlabel='', ylabel='', title='', ymax=None):
+    def plot(x, y=0, last_10=0, x2=0, last_10_2=0, xlabel='', ylabel='', title='', ymax=None):
         plt.ion()
 
         display.clear_output()
@@ -39,8 +39,9 @@ class Statistics:
         plt.xlabel(xlabel)
         plt.ylabel(ylabel)
 
-        plt.plot(last_10)
         plt.plot(x)
+        plt.plot(y)
+        plt.plot(last_10)
         plt.plot(x2)
         plt.plot(last_10_2)
 
@@ -94,9 +95,13 @@ class Statistics:
 
         mean_score = self.sum_all_scores / (e)
         last_10_mean = sum(self.last_10_scores) / 10
+
         self.plot_last_10_mean.append(last_10_mean)
         self.plot_mean.append(mean_score)
-
         self.plot_scores.append(score)
+
+        print(len(self.plot_last_10_mean))
+        print(len(self.plot_mean))
+        print(len(self.plot_scores))
 
         self.joakims_plot()
