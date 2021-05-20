@@ -9,13 +9,15 @@ import numpy as np
 from tensorflow.python.keras import Sequential
 from tensorflow.python.keras.layers import Dense
 
+
 # from tensorflow.python.keras.optimizers import Adam  #alla andra
 from tensorflow.keras.optimizers import Adam  # Henrik
+
 
 from statistics import Statistics, init_csv
 from minimize import Minimize
 
-load_model = True
+load_model = False
 
 
 class Agent:

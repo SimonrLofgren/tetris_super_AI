@@ -1,0 +1,72 @@
+##### Tetrissuperai #####
+### TfTetris ###
+1. matplotlib
+2. pip install gym_tetris
+3. (cv2) pip install opencv-python
+4. pip install tensorflow (wait for skeletons)
+
+### Statistics ###
+5. IPython
+
+##### Supermarioai #####
+### SM_AI_Game ###
+1. pip install gym-retro
+2. pip install neat-python
+3. in console: python -m retro.import ./SuperMarioAI/roms/
+
+### visualize ###
+1. graphviz
+
+##### venv #####
+venv/Lib/site-packages/retro/data/stable/SuperMarioWorld-Snes/data.json
+
+    replace with:
+
+{
+  "info": {
+    "checkpoint": {
+      "address": 5070,
+      "type": "|i1"
+    },
+    "coins": {
+      "address": 8261055,
+      "type": "|u1"
+    },
+    "endOfLevel": {
+      "address": 8259846,
+      "type": "|i1"
+    },
+    "lives": {
+      "address": 8261399,
+      "type": "|u1"
+    },
+    "powerups": {
+      "address": 25,
+      "type": "|i1"
+    },
+    "score": {
+      "address": 8261428,
+      "type": "<u4"
+    },
+    "x": {
+      "address": 148,
+      "type": "<u2"
+    },
+    "dead": {
+      "address": 8257688,
+      "type": "<u4"
+    },
+    "y": {
+      "address": 114,
+      "type": "<u4"
+    },
+    "jump": {
+      "address": 8257747,
+      "type": "<u4"
+    },
+    "yoshiCoins": {
+      "address": 8262690,
+      "type": "<u4"
+    }
+  }
+}
