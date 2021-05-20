@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+# pip install gym-retro
 import retro
 import numpy as np
 import cv2
@@ -6,6 +7,7 @@ import neat
 import pickle
 import os
 from visualize import *
+
 
 env = retro.make(game='SuperMarioWorld-Snes', state='Start')
 image_array, game_fitness, genome_generations = [], [], []
@@ -145,5 +147,5 @@ def run(config_file):
 if __name__ == '__main__':
     local_dir = os.path.dirname(__file__)
     config_path = os.path.join(local_dir, 'neat_config_file.txt')
-    #run_winner(config_path)
-    run(config_path)
+    run_winner(config_path)
+    #run(config_path)

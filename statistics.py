@@ -95,9 +95,13 @@ class Statistics:
 
         mean_score = self.sum_all_scores / (e)
         last_10_mean = sum(self.last_10_scores) / 10
+
         self.plot_last_10_mean.append(last_10_mean)
         self.plot_mean.append(mean_score)
-
         self.plot_scores.append(score)
+
+        print(len(self.plot_last_10_mean))
+        print(len(self.plot_mean))
+        print(len(self.plot_scores))
 
         self.joakims_plot()
