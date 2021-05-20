@@ -1,8 +1,8 @@
 import matplotlib.pyplot as plt
-from matplotlib import style
 from IPython import display
 import pickle
 import time
+import csv
 
 
 class Statistics:
@@ -93,15 +93,30 @@ class Statistics:
 
         self.sum_all_scores += score
 
-        mean_score = self.sum_all_scores / (e)
+        mean_score = self.sum_all_scores / e
         last_10_mean = sum(self.last_10_scores) / 10
 
-        self.plot_last_10_mean.append(last_10_mean)
+        '''self.plot_last_10_mean.append(last_10_mean)
         self.plot_mean.append(mean_score)
-        self.plot_scores.append(score)
+        self.plot_scores.append(score)'''
 
-        print(len(self.plot_last_10_mean))
-        print(len(self.plot_mean))
-        print(len(self.plot_scores))
+        data = [last_10_mean,
+                mean_score,
+                score]
 
-        self.joakims_plot()
+        with open('scores.csv', 'a') as f:
+            writer_object = csv.writer(f)
+            writer_object.writerow(data)
+
+            f.close()
+
+        # self.joakims_plot()
+
+def init_csv():
+    fields = ['last_10_mean', 'All_mean', 'Actual']
+
+    with open('scores.csv', 'w') as f:
+        dictwriter_object = csv.writer(f)
+        dictwriter_object.writerow(fields)
+
+        f.close()
