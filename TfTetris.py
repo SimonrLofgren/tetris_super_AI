@@ -142,7 +142,6 @@ if __name__ == '__main__':
         sum_splits = 0
         counter = 1
         mean_splits = []
-        counters = []
         last_10 = []
         DATA_SAVE = 0
         r = random.randrange(1, 10000)
@@ -205,8 +204,6 @@ if __name__ == '__main__':
             splits = st.timer()
             [print(f'split {i + 1}: {splits[i]}') for i in range(len(splits))
              if splits[i] > SPLIT_THRESH]
-
-            counters.append(counter)
 
             last_10.append(splits[0])
 
