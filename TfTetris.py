@@ -12,7 +12,7 @@ from tensorflow.python.keras.layers import Dense
 #from tensorflow.python.keras.optimizers import Adam  #alla andra
 from tensorflow.keras.optimizers import Adam  # Henrik
 
-from statistics import Statistics
+from statistics import Statistics, init_csv
 from minimize import Minimize
 
 load_model = False
@@ -126,13 +126,11 @@ if __name__ == '__main__':
 
     agent = Agent(state_input_size, number_of_actions)
 
-    scores, episodes = [], []
-
     st = Statistics([], [], [0] * 10, [], 0, [], [], [])
     Statistics.save_data([], filename='meanIterTimes')
+    init_csv()
     for e in range(1, EPISODES):
         st.t()  # Statistics Time
-        st.episodes.append(e)
         save_point = 0
         done = False
         score = 0
@@ -142,7 +140,6 @@ if __name__ == '__main__':
         sum_splits = 0
         counter = 1
         mean_splits = []
-        last_10 = []
         DATA_SAVE = 0
         r = random.randrange(1, 10000)
         frames = 0
@@ -196,21 +193,16 @@ if __name__ == '__main__':
             score += reward
             if done:
                 st.total_score.append(score)
-                scores.append(score)
-                episodes.append(e)
-                plt.plot(episodes, scores, 'b')
-                plt.savefig("tetris.png")
                 print("episode:", e, "  score:", score, "  memory length:",
                       len(agent.memory), "  epsilon:", agent.epsilon)
 
-                data = [mean_splits, last_10]
-                #st.save_data(data, filename=f'statistics_data/statistics{r}')
 
                 mean_iter_times = Statistics.load_data(filename='meanIterTimes.pkl')
                 mean_iter_times = mean_iter_times[0]
                 mean_iter_times.append(sum_splits/counter)
                 Statistics.plot(mean_iter_times, ymax=0.5, xlabel='episode', ylabel='Mean_time')
                 Statistics.save_data(mean_iter_times, filename='meanIterTimes')
+                mean_iter_times = 0
 
                 st.statistics(score, e)
 
@@ -223,13 +215,9 @@ if __name__ == '__main__':
             [print(f'split {i + 1}: {splits[i]}') for i in range(len(splits))
              if splits[i] > SPLIT_THRESH]
 
-            last_10.append(splits[0])
-
             sum_splits += splits[0]
             mean_split = sum_splits / counter
             mean_splits.append(mean_split)
-
-            # st.plot(mean_splits, last_10, ylabel='Time', xlabel='iteration', title="IterationAverageTime...")
 
             counter += 1
 
