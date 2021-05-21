@@ -110,7 +110,7 @@ def plot_last_average_score(df, save=False):
     plt.show()
 
     if save:
-        plt.savefig('Tetris_average_score.png')
+        plt.savefig('Tetris_average_10_score.png')
 
 
 def main():
