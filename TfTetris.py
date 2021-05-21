@@ -25,22 +25,22 @@ class Agent:
         if load_model:
             self.state_input_size = state_input_size
             self.number_of_actions = number_of_actions
-            self.learning_rate = 0.1
-            self.epsilon = 0.1
-            self.epsilon_min = 0.1
+            self.learning_rate = 0.001
+            self.epsilon = 0.2
+            self.epsilon_min = 0.2
             self.epsilon_decay = 0.9
-            self.batch_size = 512
-            self.training_start = 1000
-            self.discount_factor = 0.99
+            self.batch_size = 64
+            self.training_start = 2000
+            self.discount_factor = 0.95
 
         else:
             self.state_input_size = state_input_size
             self.number_of_actions = number_of_actions
             self.learning_rate = 0.1
             self.epsilon = 1.0  # how much random nes. 1 = 100%, 0 = 0%
-            self.epsilon_min = 0.3
+            self.epsilon_min = 0.1
             self.epsilon_decay = 0.9999
-            self.batch_size = 512
+            self.batch_size = 64
             self.training_start = 1000
             self.discount_factor = 0.99
 
@@ -114,7 +114,7 @@ class Agent:
 if __name__ == '__main__':
 
     SPLIT_THRESH = 0.6
-    EPISODES = 3000
+    EPISODES = 30000
     save_point = 0
     env = gym_tetris.make('TetrisA-v0')
     env = JoypadSpace(env, SIMPLE_MOVEMENT)
