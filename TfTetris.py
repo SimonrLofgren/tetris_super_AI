@@ -44,7 +44,7 @@ class Agent:
             self.training_start = 1000
             self.discount_factor = 0.99
 
-        self.memory = deque(maxlen=2000)
+        self.memory = deque(maxlen=20000)
         self.model = self.build_model()
 
         if load_model:
@@ -177,9 +177,7 @@ if __name__ == '__main__':
             # save the sample <s, a, r, s'> to the replay memory
             agent.append_sample(state, action, reward, next_state, done)
 
-            # if frames == 15:
-                # every time step do the training
-            agent.train_model()
+
 
             state = next_state
 
@@ -188,14 +186,17 @@ if __name__ == '__main__':
             if new_block != last_new_block:
                 for i, sum_state in enumerate(sum_states):
                     if last_sum_states[i] < sum_state:
-                        reward += (20-i*5) * int((sum_state-last_sum_states[i])/255)
+                        reward += (20-i*10) * int((sum_state-last_sum_states[i])/255)
                         last_sum_states[i] = sum_state
             last_new_block = new_block
-            '''
+
             if clear_line < int(info['number_of_lines']):
                 reward += 1000
-                clear_line = int(info['number_of_lines'])'''
+                clear_line = int(info['number_of_lines'])
 
+            if frames == 15:
+                # every time step do the training
+                agent.train_model()
             score += reward
 
             if done:
