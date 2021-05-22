@@ -36,8 +36,8 @@ class Agent:
         else:
             self.state_input_size = state_input_size
             self.number_of_actions = number_of_actions
-            self.learning_rate = 0.1
-            self.epsilon = 1.0  # how much random nes. 1 = 100%, 0 = 0%
+            self.learning_rate = 0.2
+            self.epsilon = 0.1  # how much random nes. 1 = 100%, 0 = 0%
             self.epsilon_min = 0.3
             self.epsilon_decay = 0.9999
             self.batch_size = 512
@@ -151,6 +151,7 @@ if __name__ == '__main__':
         last_new_block = 0
         clear_line = 0
 
+
         while not done:
             st.t()
             if frames == 15:
@@ -169,14 +170,14 @@ if __name__ == '__main__':
                     next_state, reward, done, info = env.step(0)
                 frames += 1
 
+
+
             next_state = Minimize(next_state)
             cv2.imshow('ComWin', next_state)  # render computer window
             score_state = next_state
             next_state = np.ndarray.flatten(
                 next_state)  # flatten 10 by 20 to 1 by 200
             # save the sample <s, a, r, s'> to the replay memory
-            agent.append_sample(state, action, reward, next_state, done)
-
 
 
             state = next_state
@@ -194,10 +195,12 @@ if __name__ == '__main__':
                 reward += 1000
                 clear_line = int(info['number_of_lines'])
 
+            score += reward
+            agent.append_sample(state, action, reward, next_state, done)
+
             if frames == 15:
                 # every time step do the training
                 agent.train_model()
-            score += reward
 
             if done:
                 st.total_score.append(score)
