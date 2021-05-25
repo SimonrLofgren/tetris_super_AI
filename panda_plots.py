@@ -28,11 +28,11 @@ def plot_all_data(df, save=False):
     df.plot(kind='line', x='Episode', y='Total Score', color='black', ax=ax)
     df.plot(kind='line', x='Episode', y='Average Score', color='lime', ax=ax)
     df.plot(kind='line', x='Episode', y='Average Score Last 10', color='red', ax=ax)
-    ax.annotate(f'Max Score: {max_score}', xy=(x_pos_1, max_score), xytext=(x_pos_1 + 10, max_score - 50),
+    ax.annotate(f'Max Score: {max_score}', xy=(x_pos_1, max_score), xytext=(x_pos_1 + 10, max_score - 10),
                 arrowprops=dict(arrowstyle="->", color='black'))
-    ax.annotate(f'Max Average: {round(max_average, 2)}', xy=(x_pos_2, max_average), xytext=(x_pos_2, max_average + 300),
+    ax.annotate(f'Max Average: {round(max_average, 2)}', xy=(x_pos_2, max_average), xytext=(x_pos_2, max_average + 20),
                 arrowprops=dict(arrowstyle='->', color='lime'))
-    ax.annotate(f'Last 10 Max:\n {round(max_a_last, 2)}', xy=(x_pos_3, max_a_last), xytext=(x_pos_3, max_a_last + 200),
+    ax.annotate(f'Last 10 Max:\n {round(max_a_last, 2)}', xy=(x_pos_3, max_a_last), xytext=(x_pos_3, max_a_last + 20),
                 arrowprops=dict(arrowstyle="->", color='red'))
 
     plt.text(0.901, 0.23, 'Last Scores', color='black',  fontsize=8, transform=plt.gcf().transFigure)
@@ -55,7 +55,7 @@ def plot_max_score(df, save=False):
     ax = plt.gca()
     df.plot(kind='line', x='Episode', y='Total Score', color='black', ax=ax)
     plt.legend(loc='upper left')
-    ax.annotate(f'Max Score: {max_score}', xy=(x_pos_1, max_score), xytext=(x_pos_1 + 10, max_score - 50),
+    ax.annotate(f'Max Score: {max_score}', xy=(x_pos_1, max_score), xytext=(x_pos_1 + 10, max_score - 10),
                 arrowprops=dict(arrowstyle="->", color='black'))
 
     plt.text(0.901, 0.2, f'Last Score: \n {last_score}', fontsize=8, transform=plt.gcf().transFigure)
@@ -78,7 +78,7 @@ def plot_average_score(df, save=False):
     plt.legend(loc='upper left')
 
     ax.annotate(f'Max Average Score: {round(average_score, 2)}', xy=(x_pos_2, average_score),
-                xytext=(x_pos_2 + 10, average_score - 70),
+                xytext=(x_pos_2 + 10, average_score - 20),
                 arrowprops=dict(arrowstyle="->", color='black'))
 
     plt.text(0.901, 0.2, f'Last Score: \n {round(last_av_score,2)}', fontsize=8, transform=plt.gcf().transFigure)
@@ -102,7 +102,7 @@ def plot_last_average_score(df, save=False):
     plt.legend(loc='upper left')
 
     ax.annotate(f'Max Last 10 \n Average Score: \n {round(last_average_score, 2)}', xy=(x_pos_3, last_average_score),
-                xytext=(x_pos_3 + 10, last_average_score - 50),
+                xytext=(x_pos_3 + 10, last_average_score - 5),
                 arrowprops=dict(arrowstyle="->", color='black'))
 
     plt.text(0.901, 0.2, f'Last Score: \n {round(last_10_score,2)}', fontsize=8, transform=plt.gcf().transFigure)
@@ -117,10 +117,10 @@ def main():
 
     df = load_csv('scores.csv')
     #get_max_value(df)
-    #plot_all_data(df, save=False)
-    #plot_max_score(df, save=False)
-    #plot_last_average_score(df, save=False)
-
+    plot_all_data(df, save=False)
+    plot_max_score(df, save=False)
+    plot_last_average_score(df, save=False)
+    plot_average_score(df, save=False)
 
 if __name__ == "__main__":
     main()
