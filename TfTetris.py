@@ -40,11 +40,11 @@ class Agent:
             self.epsilon = 1.0  # how much random nes. 1 = 100%, 0 = 0%
             self.epsilon_min = 0.1
             self.epsilon_decay = 0.9999
-            self.batch_size = 64
+            self.batch_size = 32
             self.training_start = 1000
             self.discount_factor = 0.99
 
-        self.memory = deque(maxlen=2000)
+        self.memory = deque(maxlen=10000)
         self.model = self.build_model()
 
         if load_model:
@@ -144,6 +144,9 @@ if __name__ == '__main__':
         counter = 1
         mean_splits = []
         DATA_SAVE = 0
+        board_height = 0
+        cleared_lines = 0
+        tet_stats = {'T': 0, 'J': 0, 'Z': 0, 'O': 0, 'S': 1, 'L': 0, 'I': 0}
         r = random.randrange(1, 10000)
         frames = 0
         action = agent.get_action(state)
@@ -175,28 +178,50 @@ if __name__ == '__main__':
                 next_state)  # flatten 10 by 20 to 1 by 200
             # save the sample <s, a, r, s'> to the replay memory
             agent.append_sample(state, action, reward, next_state, done)
+            if tet_stats != info['statistics']:
+                tet_stats = info['statistics']
+                if board_height < info['board_height'] <= 4:
+                    board_height = info['board_height']
+                    reward += 5
 
-            if frames == 15:
-                # every time step do the training
-                agent.train_model()
+                elif board_height < info['board_height'] >= 5:
+                    board_height = info['board_height']
+
+                elif board_height > info['board_height']:
+                    board_height = info['board_height']
+
+                elif board_height == info['board_height']:
+                    reward += 1
+
+            if cleared_lines < info['number_of_lines']:
+                cleared_lines = info['number_of_lines']
+                reward *= 10
+
+            if score < info['score']:
+                score = info['score']
+                reward += 0.5
 
             state = next_state
 
-            new_block = info['statistics']
+            """new_block = info['statistics']
             sum_states = [sum(score_state[-1]), sum(score_state[-2]), sum(score_state[-3])]
             if new_block != last_new_block:
                 for i, sum_state in enumerate(sum_states):
                     if last_sum_states[i] < sum_state:
                         reward += (20-i*5) * int((sum_state-last_sum_states[i])/255)
                         last_sum_states[i] = sum_state
-            last_new_block = new_block
+            last_new_block = new_block"""
 
             score += reward
 
+            if frames == 15:
+                # every time step do the training
+                agent.train_model()
+
             if done:
                 st.total_score.append(score)
-                print("episode:", e, "  score:", score, "  memory length:",
-                      len(agent.memory), "  epsilon:", agent.epsilon)
+                print("Episode:", e, "  Score:", score, "Lines:", info['number_of_lines'], "  Memory length:",
+                      len(agent.memory), "  Epsilon:", agent.epsilon)
 
                 """mean_iter_times = Statistics.load_data(filename='meanIterTimes.pkl')
                 mean_iter_times = mean_iter_times[0]

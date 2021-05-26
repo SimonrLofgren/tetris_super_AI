@@ -104,7 +104,7 @@ def eval_genomes(genomes, config):
             genome.fitness = current_fitness
 
 
-def run_winner(config_file, genome_path='winner_mario.pkl'):
+def run_winner(config_file, genome_path='winner_s_mario.pkl'):
     # Load requried NEAT config
     config = neat.config.Config(neat.DefaultGenome, neat.DefaultReproduction,
                                 neat.DefaultSpeciesSet, neat.DefaultStagnation, config_file)

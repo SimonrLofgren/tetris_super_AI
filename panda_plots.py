@@ -40,10 +40,10 @@ def plot_all_data(df, save=False):
     plt.text(0.901, 0.17, (df['Average Score'][df.index[-1]]), color='lime', fontsize=8, transform=plt.gcf().transFigure)
     plt.text(0.901, 0.13, (df['Average Score Last 10'][df.index[-1]]), color='red', fontsize=8, transform=plt.gcf().transFigure)
 
-    plt.show()
-
     if save:
         plt.savefig('Tetris_all_stats.png')
+
+    plt.show()
 
 
 def plot_max_score(df, save=False):
@@ -54,16 +54,16 @@ def plot_max_score(df, save=False):
 
     ax = plt.gca()
     df.plot(kind='line', x='Episode', y='Total Score', color='black', ax=ax)
-    plt.legend(loc='upper left')
-    ax.annotate(f'Max Score: {max_score}', xy=(x_pos_1, max_score), xytext=(x_pos_1 + 10, max_score - 10),
+    plt.legend(loc='upper right')
+    ax.annotate(f'Max Score: {max_score}', xy=(x_pos_1, max_score), xytext=(x_pos_1 + 600, max_score - 10),
                 arrowprops=dict(arrowstyle="->", color='black'))
 
     plt.text(0.901, 0.2, f'Last Score: \n {last_score}', fontsize=8, transform=plt.gcf().transFigure)
 
-    plt.show()
-
     if save:
         plt.savefig('Tetris_max_score.png')
+
+    plt.show()
 
 
 def plot_average_score(df, save=False):
@@ -78,15 +78,15 @@ def plot_average_score(df, save=False):
     plt.legend(loc='upper left')
 
     ax.annotate(f'Max Average Score: {round(average_score, 2)}', xy=(x_pos_2, average_score),
-                xytext=(x_pos_2 + 10, average_score - 20),
+                xytext=(x_pos_2 - 1000, average_score - 20),
                 arrowprops=dict(arrowstyle="->", color='black'))
 
     plt.text(0.901, 0.2, f'Last Score: \n {round(last_av_score,2)}', fontsize=8, transform=plt.gcf().transFigure)
 
-    plt.show()
-
     if save:
         plt.savefig('Tetris_average_score.png')
+
+    plt.show()
 
 
 def plot_last_average_score(df, save=False):
@@ -107,20 +107,21 @@ def plot_last_average_score(df, save=False):
 
     plt.text(0.901, 0.2, f'Last Score: \n {round(last_10_score,2)}', fontsize=8, transform=plt.gcf().transFigure)
 
-    plt.show()
-
     if save:
         plt.savefig('Tetris_average_10_score.png')
+
+    plt.show()
 
 
 def main():
 
     df = load_csv('scores.csv')
     #get_max_value(df)
-    plot_all_data(df, save=False)
-    plot_max_score(df, save=False)
-    plot_last_average_score(df, save=False)
-    plot_average_score(df, save=False)
+    #plot_all_data(df, save=False)
+    #plot_max_score(df, save=False)
+    #plot_last_average_score(df, save=False)
+    #plot_average_score(df, save=False)
+
 
 if __name__ == "__main__":
     main()
